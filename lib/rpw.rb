@@ -15,8 +15,8 @@ module RPW
 
     def authenticate_key(key)
       request = Typhoeus::Request.new(
-        domain + "/authenticate",
-        method: :post,
+        domain + "/license",
+        method: :get,
         headers: { Authorization: "Basic #{Base64.encode64(key + ':')}" }
       )
       
