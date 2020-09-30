@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+
+module RPW 
+  class CLI < Thor
+    class_option :verbose, :type => :boolean, :aliases => "-v"
+
+    desc "next", "Proceed to the next section of the workshop"
+
+    def next
+      # ...
+    end
+
+    desc "setup", "Set up your purchase key in order to download workshop sections"
+
+    def setup
+      # ...
+    end
+
+    desc "status", "Show your current workshop progression"
+
+    def status
+      # ...
+    end
+
+    desc "support", "Create a new support ticket, report a bug or issue"
+    
+    def support 
+
+    end
+
+    desc "show CONTENT", "Show any workshop section (use list to see all section names)"
+
+    def show(content)
+
+    end
+
+    desc "list", "Show all available workshop content"
+
+    def list 
+
+    end
+
+    desc "download [CONTENT | all]", "Download one or all workshop contents"
+
+    def download(content)
+
+    end
+  end
+end
+
+RPW::CLI.start(ARGV)
