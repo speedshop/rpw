@@ -2,19 +2,38 @@ module RPW
   VERSION = "0.0.1"
 
   class Gateway
+    class Error < StandardError; end
+
+    def authenticate_key(key)
+    end
+
     def get_resource(resource)
     end
   end
 
-  class Command
-  end
+  class Client
+    DOTFILE_NAME = ".rpw_key"
+    class Error < StandardError; end
 
-  module Commands
-    class Setup < Command
-      # if it doesn't exist, create rpw directory
-      # ask for user purchase key
-      # write purchase key to file
-      # check by reading back the purchase key from the file and printing
+    def setup(key)
+      # authenticate against server
+      gateway.authenticate_key(key)
+
+      # write authenticated key
+      begin
+        File.open(DOTFILE_NAME, "w") { |f| f.write(key) }
+      rescue
+        raise Error.new "Could not create dotfile in this directory \
+                         to save your key. Check your file permissions."
+      end
+
+      key
+    end
+
+    private
+
+    def gateway
+      @gateway ||= Gateway.new
     end
   end
 end

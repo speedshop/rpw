@@ -16,7 +16,12 @@ module RPW
     desc "setup", "Set up your purchase key in order to download workshop sections"
 
     def setup
-      # ...
+      say "We'll create a .rpw_key file in the current directory to save your key for future use."
+      key = ask("Purchase Key: ")
+
+      client.setup(key)
+
+      say "Successfully authenticated with the RPW server and saved your key."
     end
 
     desc "status", "Show your current workshop progression"
@@ -43,6 +48,12 @@ module RPW
     desc "download [CONTENT | all]", "Download one or all workshop contents"
 
     def download(content)
+    end
+
+    private 
+
+    def client
+      @client ||= RPW::Client.new 
     end
   end
 end
