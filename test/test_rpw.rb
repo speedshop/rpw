@@ -1,8 +1,15 @@
 require "minitest/autorun"
 
+class TestGateway 
+  def method_missing(*args)
+    true
+  end
+end
+
 class TestRPW < Minitest::Test
   def setup
     @client = RPW::Client.new
+    def @client.gateway; @gateway ||= TestGateway.new; end
     File.delete(RPW::Client::DOTFILE_NAME) if File.exist?(RPW::Client::DOTFILE_NAME)
   end
 

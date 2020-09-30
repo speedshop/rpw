@@ -1,10 +1,34 @@
+require "typhoeus"
+require "base64"
+
 module RPW
   VERSION = "0.0.1"
 
   class Gateway
+    attr_accessor :domain 
+
+    def initialize(domain)
+      @domain = domain
+    end
+
     class Error < StandardError; end
 
     def authenticate_key(key)
+      request = Typhoeus::Request.new(
+        domain + "/authenticate",
+        method: :post,
+        headers: { Authorization: "Basic #{Base64.encode64(key + ':')}" }
+      )
+      
+      request.on_complete do |response|
+        if response.success?
+          true
+        else
+          raise Error, "Server responded: #{response.code} #{response.response_body}"
+        end
+      end
+
+      request.run
     end
 
     def get_resource(resource)
@@ -13,6 +37,8 @@ module RPW
 
   class Client
     DOTFILE_NAME = ".rpw_key"
+    RPW_SERVER_DOMAIN = "rpw.speedshop.co"
+
     class Error < StandardError; end
 
     def setup(key)
@@ -33,7 +59,7 @@ module RPW
     private
 
     def gateway
-      @gateway ||= Gateway.new
+      @gateway ||= Gateway.new(RPW_SERVER_DOMAIN)
     end
   end
 end
