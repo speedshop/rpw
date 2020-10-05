@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "A CLI for the Rails Performance Workshop."
   spec.homepage = "https://speedshop.co"
-  spec.license = "GPLv3"
+  spec.license = "GPL-3.0-or-later"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
 
   spec.metadata["homepage_uri"] = spec.homepage

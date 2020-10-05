@@ -37,7 +37,7 @@ module RPW
 
   class Client
     DOTFILE_NAME = ".rpw_key"
-    RPW_SERVER_DOMAIN = "rpw.speedshop.co"
+    RPW_SERVER_DOMAIN = "https://rpw-licensor.speedshop.co"
 
     class Error < StandardError; end
 

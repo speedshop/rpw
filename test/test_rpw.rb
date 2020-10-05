@@ -39,5 +39,5 @@ class TestRPW < Minitest::Test
     File.stub :open, proc { raise } do
       assert_raises(RPW::Client::Error) { @client.setup(LICENSE_KEY) }
     end
-  end
+  end 
 end
