@@ -1,22 +1,30 @@
 require "minitest/autorun"
 require "rpw"
 
-class TestGateway 
+class TestGateway
   def method_missing(*args)
+    true
+  end
+
+  def respond_to_missing?(*args)
     true
   end
 end
 
-class TestRPW < Minitest::Test 
+class TestRPW < Minitest::Test
   LICENSE_KEY = "this-is-a-key"
   ADMIN_KEY = "this-is-a-admin-key"
 
   def setup
     @client = RPW::Client.new
     if ENV["LIVE_SERVER"]
-      def @client.gateway; @gateway ||= RPW::Gateway.new("localhost:3000"); end 
-    else 
-      def @client.gateway; @gateway ||= TestGateway.new; end
+      def @client.gateway
+        @gateway ||= RPW::Gateway.new("localhost:3000")
+      end
+    else
+      def @client.gateway
+        @gateway ||= TestGateway.new
+      end
     end
     File.delete(RPW::Client::DOTFILE_NAME) if File.exist?(RPW::Client::DOTFILE_NAME)
   end
@@ -40,5 +48,5 @@ class TestRPW < Minitest::Test
     File.stub :open, proc { raise } do
       assert_raises(RPW::Client::Error) { @client.setup(LICENSE_KEY) }
     end
-  end 
+  end
 end

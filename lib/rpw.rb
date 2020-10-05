@@ -3,7 +3,7 @@ require "base64"
 
 module RPW
   class Gateway
-    attr_accessor :domain 
+    attr_accessor :domain
 
     def initialize(domain)
       @domain = domain

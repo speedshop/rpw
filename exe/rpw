@@ -50,10 +50,10 @@ module RPW
     def download(content)
     end
 
-    private 
+    private
 
     def client
-      @client ||= RPW::Client.new 
+      @client ||= RPW::Client.new
     end
   end
 end
