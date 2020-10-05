@@ -12,21 +12,7 @@ module RPW
     class Error < StandardError; end
 
     def authenticate_key(key)
-      request = Typhoeus::Request.new(
-        domain + "/license",
-        method: :get,
-        headers: { Authorization: "Basic #{Base64.encode64(key + ':')}" }
-      )
-      
-      request.on_complete do |response|
-        if response.success?
-          true
-        else
-          raise Error, "Server responded: #{response.code} #{response.response_body}"
-        end
-      end
-
-      request.run
+      Typhoeus.get(domain + "/license", userpwd: key + ":").success?
     end
 
     def get_resource(resource)

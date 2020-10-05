@@ -1,4 +1,5 @@
 require "minitest/autorun"
+require "rpw"
 
 class TestGateway 
   def method_missing(*args)
