@@ -1,4 +1,4 @@
-require_relative "lib/rpw"
+require_relative "lib/rpw/version"
 
 Gem::Specification.new do |spec|
   spec.name = "rpw"

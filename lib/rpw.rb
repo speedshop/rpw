@@ -2,8 +2,6 @@ require "typhoeus"
 require "base64"
 
 module RPW
-  VERSION = "0.0.1"
-
   class Gateway
     attr_accessor :domain 
 
