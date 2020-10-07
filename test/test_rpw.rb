@@ -1,16 +1,6 @@
 require "minitest/autorun"
 require "rpw"
 
-# blow away existing filestore data
-
-begin
-  File.open(RPW::Client::DOTFILE_NAME, "r") do |f|
-    # do something with file
-    File.delete(f)
-  end
-rescue Errno::ENOENT
-end
-
 class TestGateway
   def method_missing(*args)
     true
@@ -36,11 +26,11 @@ class TestRPW < Minitest::Test
         @gateway ||= TestGateway.new
       end
     end
-    File.delete(RPW::Client::DOTFILE_NAME) if File.exist?(RPW::Client::DOTFILE_NAME)
+    delete_keyfile_and_dotfile
   end
 
   def teardown
-    File.delete(RPW::Client::DOTFILE_NAME) if File.exist?(RPW::Client::DOTFILE_NAME)
+    delete_keyfile_and_dotfile 
   end
 
   def test_setup_returns_provided_key
@@ -51,12 +41,20 @@ class TestRPW < Minitest::Test
     @client.setup(LICENSE_KEY)
     @client.setup(LICENSE_KEY)
 
-    assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::Client::DOTFILE_NAME))["key"]
+    assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::Keyfile::DOTFILE_NAME))["key"]
   end
 
   def test_setup_dotfile_write_can_fail_and_raise
     File.stub :open, proc { raise } do
-      assert_raises(RPW::Client::Error) { @client.setup(LICENSE_KEY) }
+      assert_raises(RPW::Error) { @client.setup(LICENSE_KEY) }
+    end
+  end
+
+  private 
+
+  def delete_keyfile_and_dotfile
+    [RPW::ClientData::DOTFILE_NAME, RPW::Keyfile::DOTFILE_NAME].each do |f|
+      File.delete(f) if File.exist?(f)
     end
   end
 end

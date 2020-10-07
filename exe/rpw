@@ -16,12 +16,19 @@ module RPW
     desc "setup", "Set up your purchase key in order to download workshop sections"
 
     def setup
-      say "We'll create a .rpw_key file in the current directory to save your key for future use."
-      key = ask("Purchase Key: ")
+      return unless yes? "We're going to (idempotently!) create a few files and directories in the current working directory. Is that OK? (Y/N)"
+      
+      say "We'll create a .rpw_key file in the current directory to save your purchase key and course data."
+      key = ask("Your Purchase Key: ")
 
       client.setup(key)
 
       say "Successfully authenticated with the RPW server and saved your key."
+      say "We'll also create a few directories for your course data and progress."
+
+      client.directory_setup
+
+      say "Setup complete!"
     end
 
     desc "status", "Show your current workshop progression"
