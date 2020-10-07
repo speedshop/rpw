@@ -10,7 +10,7 @@ module RPW
     desc "next", "Proceed to the next section of the workshop"
 
     def next
-      # ...
+      client.next
     end
 
     desc "setup", "Set up your purchase key in order to download workshop sections"
