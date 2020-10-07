@@ -1,10 +1,10 @@
 require "minitest/autorun"
 require "rpw"
 
-# blow away existing filestore data 
+# blow away existing filestore data
 
 begin
-  File.open(RPW::Client::DOTFILE_NAME, 'r') do |f|
+  File.open(RPW::Client::DOTFILE_NAME, "r") do |f|
     # do something with file
     File.delete(f)
   end
@@ -51,7 +51,7 @@ class TestRPW < Minitest::Test
     @client.setup(LICENSE_KEY)
     @client.setup(LICENSE_KEY)
 
-    assert_equal LICENSE_KEY, YAML.load(File.read(RPW::Client::DOTFILE_NAME))["key"]
+    assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::Client::DOTFILE_NAME))["key"]
   end
 
   def test_setup_dotfile_write_can_fail_and_raise

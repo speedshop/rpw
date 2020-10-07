@@ -1,6 +1,6 @@
 require "typhoeus"
 require "base64"
-require 'fileutils'
+require "fileutils"
 require "yaml"
 
 module RPW
@@ -30,7 +30,7 @@ module RPW
     def setup(key)
       gateway.authenticate_key(key)
       client_data_set "key", key
-      client_data["key"] 
+      client_data["key"]
     end
 
     def next
@@ -42,15 +42,21 @@ module RPW
 
     def client_data
       make_sure_dotfile_exists
-      data = YAML.load(File.read(DOTFILE_NAME)) rescue nil
-      data ||= {}
+      @client_data ||= begin
+        data = begin
+          YAML.safe_load(File.read(DOTFILE_NAME))
+        rescue
+          nil
+        end
+        data || {}
+      end
     end
 
     def client_data_set(key, value)
       data = client_data
       data[key] = value
-      File.open(DOTFILE_NAME, "w") { |f| f.write(YAML.dump(data))}
-      data
+      File.open(DOTFILE_NAME, "w") { |f| f.write(YAML.dump(data)) }
+      @client_data = data
     end
 
     def gateway
@@ -59,7 +65,7 @@ module RPW
 
     def make_sure_dotfile_exists
       return true if File.exist?(DOTFILE_NAME)
-      begin 
+      begin
         FileUtils.touch(DOTFILE_NAME)
       rescue
         raise Error.new "Could not create the RPW data file in this directory \
