@@ -30,7 +30,7 @@ class TestRPW < Minitest::Test
   end
 
   def teardown
-    delete_keyfile_and_dotfile 
+    delete_keyfile_and_dotfile
   end
 
   def test_setup_returns_provided_key
@@ -50,7 +50,7 @@ class TestRPW < Minitest::Test
     end
   end
 
-  private 
+  private
 
   def delete_keyfile_and_dotfile
     [RPW::ClientData::DOTFILE_NAME, RPW::Keyfile::DOTFILE_NAME].each do |f|

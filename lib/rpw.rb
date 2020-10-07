@@ -1,7 +1,4 @@
 require "typhoeus"
-require "base64"
-require "fileutils"
-require "yaml"
 require "json"
 
 module RPW
@@ -23,9 +20,9 @@ module RPW
 
     def get_content_by_position(position)
       response = Typhoeus.get(domain + "/content/position/?position=" + position, userpwd: key + ":")
-      if response.success? 
+      if response.success?
         JSON.parse(response.body)
-      else 
+      else
         raise Error, "There was a problem fetching this content."
       end
     end
@@ -44,7 +41,7 @@ module RPW
         FileUtils.mkdir_p(path) unless File.directory?(path)
       end
 
-      File.open('.gitignore', 'a') do |f| 
+      File.open(".gitignore", "a") do |f|
         f.puts "\n"
         f.puts ".rpw_key\n"
         f.puts ".rpw_info\n"
@@ -66,7 +63,7 @@ module RPW
       @client_data ||= ClientData.new
     end
 
-    def keyfile 
+    def keyfile
       @keyfile ||= Keyfile.new
     end
 
@@ -74,13 +71,13 @@ module RPW
       @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, keyfile["key"])
     end
 
-    def display_content 
+    def display_content
       case content["type"]
       when "video"
-        # download 
-        # play video with preferred player 
+        # download
+        # play video with preferred player
       when "quiz"
-        # start quiz routine 
+        # start quiz routine
       when "lab"
         # download lab
         # display message
@@ -88,7 +85,10 @@ module RPW
     end
   end
 
-  class ClientData 
+  require "fileutils"
+  require "yaml"
+
+  class ClientData
     DOTFILE_NAME = ".rpw_info"
 
     def [](key)
@@ -104,14 +104,17 @@ module RPW
         raise Error, "The RPW data file in this directory is not writable. \
                       Check your file permissions."
       end
-      value
     end
 
     private
 
-    def data 
+    def data
       @data ||= begin
-        yaml = YAML.safe_load(File.read(self.class::DOTFILE_NAME)) rescue nil
+        yaml = begin
+          YAML.safe_load(File.read(self.class::DOTFILE_NAME))
+        rescue
+          nil
+        end
         yaml || {}
       end
     end
@@ -127,7 +130,7 @@ module RPW
     end
   end
 
-  class Keyfile < ClientData 
+  class Keyfile < ClientData
     DOTFILE_NAME = ".rpw_key"
   end
 end

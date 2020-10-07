@@ -17,7 +17,7 @@ module RPW
 
     def setup
       return unless yes? "We're going to (idempotently!) create a few files and directories in the current working directory. Is that OK? (Y/N)"
-      
+
       say "We'll create a .rpw_key file in the current directory to save your purchase key and course data."
       key = ask("Your Purchase Key: ")
 
