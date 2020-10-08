@@ -50,7 +50,7 @@ module RPW
     end
 
     def directory_setup
-      ["videos", "quizzes", "labs", "text", "cgrp"].each do |path|
+      ["video", "quiz", "lab", "text", "cgrp"].each do |path|
         FileUtils.mkdir_p(path) unless File.directory?(path)
       end
 
@@ -60,23 +60,34 @@ module RPW
         f.puts "\n"
         f.puts ".rpw_key\n"
         f.puts ".rpw_info\n"
-        f.puts "videos\n"
-        f.puts "quizzes\n"
-        f.puts "labs\n"
+        f.puts "video\n"
+        f.puts "quiz\n"
+        f.puts "lab\n"
         f.puts "text\n"
         f.puts "cgrp\n"
       end
     end
 
     def next
-      last_completed_position = client_data["position"] ? client_data["position"] + 1 : 0
-      content = gateway.get_content_by_position(last_completed_position)
-      gateway.download_content(content, folder: content["style"])
-      extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+      content = gateway.get_content_by_position(next_position)
+      unless File.exist?(content["style"] + "/" + content['s3_key'])
+        gateway.download_content(content, folder: content["style"]) 
+        extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+      end
+      update_current_position(content)
       display_content(content)
     end
 
     private
+
+    def update_current_position(content)
+      client_data["position"] ||= 0 
+      client_data["position"] = content["position"] + 1 
+    end
+
+    def next_position
+      client_data["position"] ? client_data["position"] + 1 : 0 
+    end
 
     def client_data
       @client_data ||= ClientData.new
@@ -98,14 +109,16 @@ module RPW
     def display_content(content)
       case content["style"]
       when "video"
-        exec("open videos/#{content['s3_key']}.mp4")
+        puts "Opening video: #{content["title"]}"
+        exec("open video/#{content['s3_key']}")
       when "quiz"
         # start quiz routine
       when "lab"
         # extract and rm archive
-        puts "Lab downloaded to labs/#{content['s3_key']}, navigate there and look at the README to continue"
+        puts "Lab downloaded to lab/#{content['s3_key']}, navigate there and look at the README to continue"
       when "text"
-        exec("`$EDITOR` text/#{content['s3_key']}")
+        puts "Opening in your editor: #{content["title"]}"
+        exec("$EDITOR text/#{content['s3_key']}")
       when "cgrp"
         puts "The Complete Guide to Rails Performance has been downloaded and extracted to the cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
