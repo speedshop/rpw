@@ -19,12 +19,25 @@ module RPW
     end
 
     def get_content_by_position(position)
-      response = Typhoeus.get(domain + "/content/position/?position=" + position, userpwd: key + ":")
+      response = Typhoeus.get(domain + "/contents/positional?position=#{position}", userpwd: @key + ":")
       if response.success?
         JSON.parse(response.body)
       else
         raise Error, "There was a problem fetching this content."
       end
+    end
+
+    def download_content(content, folder:)
+      downloaded_file = File.open("#{folder}/#{content['s3_key']}","w")
+      puts "Beginning download, please wait."
+      request = Typhoeus::Request.new(content["url"])
+      request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
+      request.on_body do |chunk|
+        downloaded_file.write(chunk)
+        printf(".") if rand(10) == 0 # lol
+      end
+      request.on_complete { |response| puts "" && downloaded_file.close }
+      request.run
     end
   end
 
@@ -56,9 +69,10 @@ module RPW
     end
 
     def next
-      last_completed_position = (client_data["position"] + 1) || 0
+      last_completed_position = client_data["position"] ? client_data["position"] + 1 : 0
       content = gateway.get_content_by_position(last_completed_position)
-      download_content(content, folder: content["style"])
+      gateway.download_content(content, folder: content["style"])
+      extract_content(content) if content['s3_key'].end_with?(".tar.gz")
       display_content(content)
     end
 
@@ -76,6 +90,11 @@ module RPW
       @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, keyfile["key"])
     end
 
+    def extract_content(content)
+      folder = content["style"]
+      `tar -C #{folder} -xvzf #{folder}/#{content['s3_key']}`
+    end
+
     def display_content(content)
       case content["style"]
       when "video"
@@ -88,23 +107,9 @@ module RPW
       when "text"
         exec("`$EDITOR` text/#{content['s3_key']}")
       when "cgrp"
-        # extract and rm archive
         puts "The Complete Guide to Rails Performance has been downloaded and extracted to the cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
-    end
-
-    def download_content(content, folder:)
-      downloaded_file = File.open("#{folder}/#{content['s3_key']}")
-      puts "Beginning download, please wait."
-      request = Typhoeus::Request.new(content["url"])
-      request.on_headers { |response| raise "Request failed" if response.code != 200 }
-      request.on_body do |chunk|
-        downloaded_file.write(chunk)
-        printf(".")
-      end
-      request.on_complete { |response| downloaded_file.close }
-      request.run
     end
   end
 
