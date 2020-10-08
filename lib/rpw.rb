@@ -29,7 +29,7 @@ module RPW
   end
 
   class Client
-    RPW_SERVER_DOMAIN = "https://rpw-licensor.speedshop.co"
+    RPW_SERVER_DOMAIN = ENV["RPW_SERVER_DOMAIN"] || "https://rpw-licensor.speedshop.co"
 
     def setup(key)
       gateway.authenticate_key(key)
