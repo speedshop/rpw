@@ -5,6 +5,10 @@ require_relative "../lib/rpw"
 
 module RPW
   class CLI < Thor
+    def self.exit_on_failure?
+      true
+    end
+    
     class_option :verbose, type: :boolean, aliases: "-v"
 
     desc "next", "Proceed to the next section of the workshop"

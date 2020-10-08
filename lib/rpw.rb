@@ -112,7 +112,7 @@ module RPW
         puts "Opening video: #{content["title"]}"
         exec("open video/#{content['s3_key']}")
       when "quiz"
-        # start quiz routine
+        Quiz.new("quiz/" + content['s3_key']).start
       when "lab"
         # extract and rm archive
         puts "Lab downloaded to lab/#{content['s3_key']}, navigate there and look at the README to continue"
@@ -173,5 +173,33 @@ module RPW
 
   class Keyfile < ClientData
     DOTFILE_NAME = ".rpw_key"
+  end
+
+  require 'digest'
+
+  class Quiz 
+    def initialize(filename)
+      puts filename
+      @quiz_data = YAML.safe_load(File.read(filename))
+    end
+
+    def start 
+      @quiz_data["questions"].each { |q| question(q) }
+    end
+
+    private 
+
+    def question(data) 
+      puts data["prompt"]
+      data["answer_choices"].each { |ac| puts ac }
+      provided_answer = gets.chomp 
+      answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer)
+      if answer_digest == data["answer_digest"] 
+        puts "Correct!"
+      else 
+        puts "Incorrect."
+        puts "I encourage you to try reviewing the material to see what the correct answer is."
+      end
+    end
   end
 end
