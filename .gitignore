@@ -2,3 +2,4 @@ bundle
 *.gem
 .rpw_key
 .rpw_info
+smoketest

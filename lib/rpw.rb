@@ -37,9 +37,11 @@ module RPW
     end
 
     def directory_setup
-      ["videos", "quizzes", "labs"].each do |path|
+      ["videos", "quizzes", "labs", "text", "cgrp"].each do |path|
         FileUtils.mkdir_p(path) unless File.directory?(path)
       end
+
+      client_data["test"] = "test" # just to write the file
 
       File.open(".gitignore", "a") do |f|
         f.puts "\n"
@@ -48,12 +50,15 @@ module RPW
         f.puts "videos\n"
         f.puts "quizzes\n"
         f.puts "labs\n"
+        f.puts "text\n"
+        f.puts "cgrp\n"
       end
     end
 
     def next
       last_completed_position = (client_data["position"] + 1) || 0
       content = gateway.get_content_by_position(last_completed_position)
+      download_content(content, folder: content["style"])
       display_content(content)
     end
 
@@ -71,17 +76,35 @@ module RPW
       @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, keyfile["key"])
     end
 
-    def display_content
-      case content["type"]
+    def display_content(content)
+      case content["style"]
       when "video"
-        # download
-        # play video with preferred player
+        exec("open videos/#{content['s3_key']}.mp4")
       when "quiz"
         # start quiz routine
       when "lab"
-        # download lab
-        # display message
+        # extract and rm archive
+        puts "Lab downloaded to labs/#{content['s3_key']}, navigate there and look at the README to continue"
+      when "text"
+        exec("`$EDITOR` text/#{content['s3_key']}")
+      when "cgrp"
+        # extract and rm archive
+        puts "The Complete Guide to Rails Performance has been downloaded and extracted to the cgrp directory."
+        puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
+    end
+
+    def download_content(content, folder:)
+      downloaded_file = File.open("#{folder}/#{content['s3_key']}")
+      puts "Beginning download, please wait."
+      request = Typhoeus::Request.new(content["url"])
+      request.on_headers { |response| raise "Request failed" if response.code != 200 }
+      request.on_body do |chunk|
+        downloaded_file.write(chunk)
+        printf(".")
+      end
+      request.on_complete { |response| downloaded_file.close }
+      request.run
     end
   end
 
