@@ -4,20 +4,68 @@ require "thor"
 require_relative "../lib/rpw"
 
 module RPW
-  class CLI < Thor
-    def self.exit_on_failure?
-      true
+  class SubCommandBase < Thor 
+    def self.banner(command, namespace = nil, subcommand = false)
+      "#{basename} #{subcommand_prefix} #{command.usage}"
     end
-    
-    class_option :verbose, type: :boolean, aliases: "-v"
+  
+    def self.subcommand_prefix
+      self.name.gsub(%r{.*::}, '').gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" } 
+    end
+  end
 
-    desc "next", "Proceed to the next section of the workshop"
+  class Lesson < SubCommandBase
+    desc "next", "Proceed to the next lesson of the workshop"
 
     def next
       client.next
     end
 
-    desc "setup", "Set up your purchase key in order to download workshop sections"
+    desc "complete", "Mark the current lesson as complete"
+
+    def complete 
+    end
+
+    desc "list", "Show all available workshop lessons"
+
+    def list
+    end
+
+    desc "download [CONTENT | all]", "Download one or all workshop contents"
+
+    def download(content)
+    end
+
+    desc "show [CONTENT]", "Show any workshop lesson"
+
+    def show(content)
+    end
+  end
+
+  class Progress < SubCommandBase
+    desc "set [LESSON]", "Set progress to a particular lesson"
+
+    def set(lesson)
+    end
+
+    desc "reset", "Erase all progress and start over"
+
+    def reset
+    end
+  end
+
+
+  class CLI < Thor
+    desc "lesson [SUBCOMMAND]", "View and download lessons"
+    subcommand "lesson", Lesson 
+    desc "progress [SUBCOMMAND]", "View and set progress"
+    subcommand "progress", Progress  
+
+    def self.exit_on_failure?
+      true
+    end
+    
+    desc "setup", "Set up purchase key and directories"
 
     def setup
       return unless yes? "We're going to (idempotently!) create a few files and directories in the current working directory. Is that OK? (Y/N)"
@@ -35,30 +83,9 @@ module RPW
       say "Setup complete!"
     end
 
-    desc "status", "Show your current workshop progression"
-
-    def status
-      # ...
-    end
-
     desc "support", "Create a new support ticket, report a bug or issue"
 
     def support
-    end
-
-    desc "show CONTENT", "Show any workshop section (use list to see all section names)"
-
-    def show(content)
-    end
-
-    desc "list", "Show all available workshop content"
-
-    def list
-    end
-
-    desc "download [CONTENT | all]", "Download one or all workshop contents"
-
-    def download(content)
     end
 
     private
