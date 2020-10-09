@@ -37,6 +37,7 @@ module RPW
     end
 
     def download_content(content, folder:)
+      puts "Downloading #{content['title']}..."
       downloaded_file = File.open("#{folder}/#{content['s3_key']}","w")
       request = Typhoeus::Request.new(content["url"])
       #request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
@@ -77,17 +78,18 @@ module RPW
     end
 
     def next
-      content = gateway.get_content_by_position(next_position)
+      content = next_content
       unless File.exist?(content["style"] + "/" + content['s3_key'])
         gateway.download_content(content, folder: content["style"]).run 
         extract_content(content) if content['s3_key'].end_with?(".tar.gz")
       end
-      increment_current_position(content)
+      client_data["current_lesson"] = content["position"]
       display_content(content)
     end
 
     def complete 
-      client_data["position"] += 1
+      client_data["completed"] ||= []
+      client_data["completed"] += [client_data["current_lesson"]]
     end
 
     def list 
@@ -100,6 +102,7 @@ module RPW
         gateway.download_content(content, folder: content["style"]) 
         extract_content(content) if content['s3_key'].end_with?(".tar.gz")
       end
+      client_data["current_lesson"] = content["position"]
       display_content(content)
     end
 
@@ -126,13 +129,11 @@ module RPW
 
     private
 
-    def increment_current_position(content)
-      client_data["position"] ||= 0 
-      client_data["position"] = content["position"] + 1 
-    end
-
-    def next_position
-      client_data["position"] ? client_data["position"] + 1 : 0 
+    def next_content
+      contents = gateway.list_content
+      return contents.first unless client_data["completed"]
+      contents.delete_if { |c| client_data["completed"].include? c["position"] }
+      contents.sort_by { |c| c["position"] }.first
     end
 
     def client_data
