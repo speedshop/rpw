@@ -65,17 +65,19 @@ module RPW
         FileUtils.mkdir_p(path) unless File.directory?(path)
       end
 
-      client_data["test"] = "test" # just to write the file
+      client_data["completed"] = [] # just to write the file
 
-      File.open(".gitignore", "a") do |f|
-        f.puts "\n"
-        f.puts ".rpw_key\n"
-        f.puts ".rpw_info\n"
-        f.puts "video\n"
-        f.puts "quiz\n"
-        f.puts "lab\n"
-        f.puts "text\n"
-        f.puts "cgrp\n"
+      unless File.exist?(".gitignore") && File.read(".gitignore").match(/rpw_key/)
+        File.open(".gitignore", "a") do |f|
+          f.puts "\n"
+          f.puts ".rpw_key\n"
+          f.puts ".rpw_info\n"
+          f.puts "video\n"
+          f.puts "quiz\n"
+          f.puts "lab\n"
+          f.puts "text\n"
+          f.puts "cgrp\n"
+        end
       end
     end
 
