@@ -23,6 +23,7 @@ module RPW
       if response.success?
         JSON.parse(response.body)
       else
+        puts response.inspect
         raise Error, "There was a problem fetching this content."
       end
     end
@@ -32,15 +33,16 @@ module RPW
       if response.success?
         JSON.parse(response.body)
       else
+        puts response.inspect
         raise Error, "There was a problem fetching this content."
       end
     end
 
     def download_content(content, folder:)
-      puts "Downloading #{content['title']}..."
-      downloaded_file = File.open("#{folder}/#{content['s3_key']}","w")
+      puts "Downloading #{content["title"]}..."
+      downloaded_file = File.open("#{folder}/#{content["s3_key"]}", "w")
       request = Typhoeus::Request.new(content["url"])
-      #request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
+      # request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
       request.on_body do |chunk|
         downloaded_file.write(chunk)
         printf(".") if rand(10) == 0 # lol
@@ -79,28 +81,28 @@ module RPW
 
     def next
       content = next_content
-      unless File.exist?(content["style"] + "/" + content['s3_key'])
-        gateway.download_content(content, folder: content["style"]).run 
-        extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+      unless File.exist?(content["style"] + "/" + content["s3_key"])
+        gateway.download_content(content, folder: content["style"]).run
+        extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
       display_content(content)
     end
 
-    def complete 
+    def complete
       client_data["completed"] ||= []
       client_data["completed"] += [client_data["current_lesson"]]
     end
 
-    def list 
+    def list
       gateway.list_content
     end
 
     def show(content_pos)
       content = gateway.get_content_by_position(content_pos)
-      unless File.exist?(content["style"] + "/" + content['s3_key'])
-        gateway.download_content(content, folder: content["style"]) 
-        extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+      unless File.exist?(content["style"] + "/" + content["s3_key"])
+        gateway.download_content(content, folder: content["style"])
+        extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
       display_content(content)
@@ -110,30 +112,58 @@ module RPW
       if content_pos.downcase == "all"
         to_download = gateway.list_content
         hydra = Typhoeus::Hydra.new(max_concurrency: 5)
-        binding.irb
         to_download.each do |content|
-          unless File.exist?(content["style"] + "/" + content['s3_key'])
-            hydra.queue gateway.download_content(content, folder: content["style"]) 
-          end 
+          unless File.exist?(content["style"] + "/" + content["s3_key"])
+            hydra.queue gateway.download_content(content, folder: content["style"])
+          end
         end
         hydra.run
-        to_download.each {|content|  extract_content(content) if content['s3_key'].end_with?(".tar.gz") }
+        to_download.each { |content| extract_content(content) if content["s3_key"].end_with?(".tar.gz") }
       else
         content = gateway.get_content_by_position(content_pos)
-        unless File.exist?(content["style"] + "/" + content['s3_key'])
+        unless File.exist?(content["style"] + "/" + content["s3_key"])
           gateway.download_content(content, folder: content["style"]).run
-          extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+          extract_content(content) if content["s3_key"].end_with?(".tar.gz")
         end
       end
     end
 
+    def progress
+      contents = gateway.list_content
+      {
+        completed: client_data["completed"].size,
+        total: contents.size,
+        current_lesson: contents.find { |c| c["position"] == client_data["current_lesson"] },
+        sections: chart_section_progress(contents)
+      }
+    end
+
     private
+
+    def chart_section_progress(contents)
+      contents.group_by { |c| c["position"] / 100 }
+        .each_with_object([]) do |(_, c), memo|
+          completed_str = c.map { |l|
+            if l["position"] == client_data["current_lesson"]
+              "O"
+            elsif client_data["completed"].include?(l["position"])
+              "X"
+            else
+              "."
+            end
+          }.join
+          memo << {
+            title: c[0]["title"],
+            progress: completed_str
+          }
+        end
+    end
 
     def next_content
       contents = gateway.list_content
       return contents.first unless client_data["completed"]
       contents.delete_if { |c| client_data["completed"].include? c["position"] }
-      contents.sort_by { |c| c["position"] }.first
+      contents.min_by { |c| c["position"] }
     end
 
     def client_data
@@ -150,22 +180,22 @@ module RPW
 
     def extract_content(content)
       folder = content["style"]
-      `tar -C #{folder} -xvzf #{folder}/#{content['s3_key']}`
+      `tar -C #{folder} -xvzf #{folder}/#{content["s3_key"]}`
     end
 
     def display_content(content)
       case content["style"]
       when "video"
         puts "Opening video: #{content["title"]}"
-        exec("open video/#{content['s3_key']}")
+        exec("open video/#{content["s3_key"]}")
       when "quiz"
-        Quiz.start(["give_quiz", "quiz/" + content['s3_key']])
+        Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
       when "lab"
         # extract and rm archive
-        puts "Lab downloaded to lab/#{content['s3_key']}, navigate there and look at the README to continue"
+        puts "Lab downloaded to lab/#{content["s3_key"]}, navigate there and look at the README to continue"
       when "text"
         puts "Opening in your editor: #{content["title"]}"
-        exec("$EDITOR text/#{content['s3_key']}")
+        exec("$EDITOR text/#{content["s3_key"]}")
       when "cgrp"
         puts "The Complete Guide to Rails Performance has been downloaded and extracted to the cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
@@ -222,26 +252,25 @@ module RPW
     DOTFILE_NAME = ".rpw_key"
   end
 
-  require 'digest'
+  require "digest"
 
-  class Quiz < Thor 
-
+  class Quiz < Thor
     desc "give_quiz FILENAME", ""
     def give_quiz(filename)
       @quiz_data = YAML.safe_load(File.read(filename))
       @quiz_data["questions"].each { |q| question(q) }
     end
 
-    private 
+    private
 
-    def question(data) 
+    def question(data)
       puts data["prompt"]
       data["answer_choices"].each { |ac| puts ac }
       provided_answer = ask("Your answer?")
       answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer)
-      if answer_digest == data["answer_digest"] 
+      if answer_digest == data["answer_digest"]
         say "Correct!"
-      else 
+      else
         say "Incorrect."
         say "I encourage you to try reviewing the material to see what the correct answer is."
       end

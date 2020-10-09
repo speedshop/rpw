@@ -4,13 +4,13 @@ require "thor"
 require_relative "../lib/rpw"
 
 module RPW
-  class SubCommandBase < Thor 
+  class SubCommandBase < Thor
     def self.banner(command, namespace = nil, subcommand = false)
       "#{basename} #{subcommand_prefix} #{command.usage}"
     end
-  
+
     def self.subcommand_prefix
-      self.name.gsub(%r{.*::}, '').gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" } 
+      name.gsub(%r{.*::}, "").gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" }
     end
   end
 
@@ -24,7 +24,7 @@ module RPW
 
     desc "complete", "Mark the current lesson as complete"
 
-    def complete 
+    def complete
       say "Marked current lesson as complete"
       client.complete
     end
@@ -33,8 +33,8 @@ module RPW
 
     def list
       say "All available workshop lessons:"
-      client.list.each do |lesson| 
-        puts "#{"  " * lesson['indent']}[#{lesson['position']}]: #{lesson['title']}"
+      client.list.each do |lesson|
+        puts "#{"  " * lesson["indent"]}[#{lesson["position"]}]: #{lesson["title"]}"
       end
     end
 
@@ -67,19 +67,38 @@ module RPW
 
     def reset
     end
-  end
 
+    desc "show", "Show current workshop progress"
+    def show
+      data = client.progress
+      say "The Rails Performance Workshop"
+      say "You have completed #{data[:completed]} out of #{data[:total]} total sections."
+      say "Current lesson: #{data[:current_lesson]["title"]}"
+      say "Progress by Section (X == completed, O == current):"
+      data[:sections].each do |section|
+        say "#{section[:title]}: #{section[:progress]}"
+      end
+    end
+
+    private
+
+    def client
+      @client ||= RPW::Client.new
+    end
+
+    default_task :show
+  end
 
   class CLI < Thor
     desc "lesson [SUBCOMMAND]", "View and download lessons"
-    subcommand "lesson", Lesson 
+    subcommand "lesson", Lesson
     desc "progress [SUBCOMMAND]", "View and set progress"
-    subcommand "progress", Progress  
+    subcommand "progress", Progress
 
     def self.exit_on_failure?
       true
     end
-    
+
     desc "setup", "Set up purchase key and directories"
 
     def setup
