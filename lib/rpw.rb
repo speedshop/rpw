@@ -138,6 +138,15 @@ module RPW
       }
     end
 
+    def set_progress(lesson)
+      client_data["current_lesson"] = lesson.to_i
+    end
+
+    def reset_progress
+      client_data["current_lesson"] = 0
+      client_data["completed"] = []
+    end
+
     private
 
     def chart_section_progress(contents)

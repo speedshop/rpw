@@ -58,14 +58,17 @@ module RPW
   end
 
   class Progress < SubCommandBase
-    desc "set [LESSON]", "Set progress to a particular lesson"
+    desc "set [LESSON]", "Set current lesson to a particular lesson"
 
     def set(lesson)
+      client.set_progress(lesson)
     end
 
     desc "reset", "Erase all progress and start over"
 
     def reset
+      yes? "Are you sure you want to reset your progress? (Y/N)"
+      client.reset_progress
     end
 
     desc "show", "Show current workshop progress"
