@@ -42,7 +42,6 @@ module RPW
       puts "Downloading #{content["title"]}..."
       downloaded_file = File.open("#{folder}/#{content["s3_key"]}", "w")
       request = Typhoeus::Request.new(content["url"])
-      # request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
       request.on_body do |chunk|
         downloaded_file.write(chunk)
         printf(".") if rand(10) == 0 # lol
@@ -103,7 +102,7 @@ module RPW
     def show(content_pos)
       content = gateway.get_content_by_position(content_pos)
       unless File.exist?(content["style"] + "/" + content["s3_key"])
-        gateway.download_content(content, folder: content["style"])
+        gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
