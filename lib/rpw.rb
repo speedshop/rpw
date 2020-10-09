@@ -27,17 +27,25 @@ module RPW
       end
     end
 
+    def list_content
+      response = Typhoeus.get(domain + "/contents", userpwd: @key + ":")
+      if response.success?
+        JSON.parse(response.body)
+      else
+        raise Error, "There was a problem fetching this content."
+      end
+    end
+
     def download_content(content, folder:)
       downloaded_file = File.open("#{folder}/#{content['s3_key']}","w")
-      puts "Beginning download, please wait."
       request = Typhoeus::Request.new(content["url"])
-      request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
+      #request.on_headers { |response| raise Error, "Request failed" if response.code != 200 }
       request.on_body do |chunk|
         downloaded_file.write(chunk)
         printf(".") if rand(10) == 0 # lol
       end
-      request.on_complete { |response| puts "" && downloaded_file.close }
-      request.run
+      request.on_complete { |response| downloaded_file.close }
+      request
     end
   end
 
@@ -71,16 +79,54 @@ module RPW
     def next
       content = gateway.get_content_by_position(next_position)
       unless File.exist?(content["style"] + "/" + content['s3_key'])
+        gateway.download_content(content, folder: content["style"]).run 
+        extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+      end
+      increment_current_position(content)
+      display_content(content)
+    end
+
+    def complete 
+      client_data["position"] += 1
+    end
+
+    def list 
+      gateway.list_content
+    end
+
+    def show(content_pos)
+      content = gateway.get_content_by_position(content_pos)
+      unless File.exist?(content["style"] + "/" + content['s3_key'])
         gateway.download_content(content, folder: content["style"]) 
         extract_content(content) if content['s3_key'].end_with?(".tar.gz")
       end
-      update_current_position(content)
       display_content(content)
+    end
+
+    def download(content_pos)
+      if content_pos.downcase == "all"
+        to_download = gateway.list_content
+        hydra = Typhoeus::Hydra.new(max_concurrency: 5)
+        binding.irb
+        to_download.each do |content|
+          unless File.exist?(content["style"] + "/" + content['s3_key'])
+            hydra.queue gateway.download_content(content, folder: content["style"]) 
+          end 
+        end
+        hydra.run
+        to_download.each {|content|  extract_content(content) if content['s3_key'].end_with?(".tar.gz") }
+      else
+        content = gateway.get_content_by_position(content_pos)
+        unless File.exist?(content["style"] + "/" + content['s3_key'])
+          gateway.download_content(content, folder: content["style"]).run
+          extract_content(content) if content['s3_key'].end_with?(".tar.gz")
+        end
+      end
     end
 
     private
 
-    def update_current_position(content)
+    def increment_current_position(content)
       client_data["position"] ||= 0 
       client_data["position"] = content["position"] + 1 
     end

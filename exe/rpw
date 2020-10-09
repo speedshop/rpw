@@ -18,27 +18,42 @@ module RPW
     desc "next", "Proceed to the next lesson of the workshop"
 
     def next
+      say "Proceeding to next lesson..."
       client.next
     end
 
     desc "complete", "Mark the current lesson as complete"
 
     def complete 
+      say "Marked current lesson as complete"
+      client.complete
     end
 
     desc "list", "Show all available workshop lessons"
 
     def list
+      say "All available workshop lessons:"
+      client.list.each do |lesson| 
+        puts "[#{lesson['position']}]: #{lesson['title']}"
+      end
     end
 
     desc "download [CONTENT | all]", "Download one or all workshop contents"
 
     def download(content)
+      client.download(content)
     end
 
     desc "show [CONTENT]", "Show any workshop lesson"
 
     def show(content)
+      client.show(content)
+    end
+
+    private
+
+    def client
+      @client ||= RPW::Client.new
     end
   end
 
