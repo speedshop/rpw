@@ -105,15 +105,17 @@ module RPW
     desc "setup", "Set up purchase key and directories"
 
     def setup
-      return unless yes? "We're going to (idempotently!) create a few files and directories in the current working directory. Is that OK? (Y/N)"
-
-      say "We'll create a .rpw_key file in the current directory to save your purchase key and course data."
+      return unless
+      say "We'll create a .rpw_key file at #{File.expand_path("~/.rpw")} to save your purchase key."
       key = ask("Your Purchase Key: ")
 
       client.setup(key)
 
       say "Successfully authenticated with the RPW server and saved your key."
-      say "We'll also create a few directories for your course data and progress."
+
+      return unless yes? "rpw works by downloading files into the current working directory. \
+        We're going to (idempotently!) create a few directories in the current working directory. \
+        Is that OK? (Y/N)"
 
       client.directory_setup
 

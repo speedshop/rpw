@@ -41,7 +41,7 @@ class TestRPW < Minitest::Test
     @client.setup(LICENSE_KEY)
     @client.setup(LICENSE_KEY)
 
-    assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::Keyfile::DOTFILE_NAME))["key"]
+    assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::Keyfile.filestore_location))["key"]
   end
 
   def test_setup_dotfile_write_can_fail_and_raise
@@ -53,8 +53,6 @@ class TestRPW < Minitest::Test
   private
 
   def delete_keyfile_and_dotfile
-    [RPW::ClientData::DOTFILE_NAME, RPW::Keyfile::DOTFILE_NAME].each do |f|
-      File.delete(f) if File.exist?(f)
-    end
+    [RPW::ClientData, RPW::Keyfile].each { |f| f.delete_filestore }
   end
 end

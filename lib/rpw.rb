@@ -226,15 +226,38 @@ module RPW
 
     def []=(key, value)
       data[key] = value
+
+      create_client_data_directory(filestore_location)
+
       begin
-        File.open(self.class::DOTFILE_NAME, "w") { |f| f.write(YAML.dump(data)) }
+        File.open(filestore_location, "w") { |f| f.write(YAML.dump(data)) }
       rescue
-        raise Error, "The RPW data file in this directory is not writable. \
+        raise Error, "The RPW data at #{filestore_location} is not writable. \
                       Check your file permissions."
       end
     end
 
+    def self.delete_filestore
+      return unless File.exist?(filestore_location)
+      FileUtils.remove(filestore_location)
+    end
+
+    def self.filestore_location
+      File.expand_path("~/.rpw/" + self::DOTFILE_NAME)
+    end
+
     private
+
+    def filestore_location
+      self.class.filestore_location
+    end
+
+    def create_client_data_directory(path)
+      dirname = File.dirname(path)
+      unless File.directory?(dirname)
+        FileUtils.mkdir_p(dirname)
+      end
+    end
 
     def data
       @data ||= begin
@@ -263,6 +286,7 @@ module RPW
   end
 
   require "digest"
+  require "thor"
 
   class Quiz < Thor
     desc "give_quiz FILENAME", ""
