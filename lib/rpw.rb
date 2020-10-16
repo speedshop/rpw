@@ -194,20 +194,20 @@ module RPW
     end
 
     def display_content(content)
+      puts "Viewing: #{content["title"]}"
       case content["style"]
       when "video"
-        puts "Opening video: #{content["title"]}"
-        exec("open video/#{content["s3_key"]}")
+        puts "Location: video/#{content["s3_key"]}"
       when "quiz"
         Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
       when "lab"
-        # extract and rm archive
-        puts "Lab downloaded to lab/#{content["s3_key"]}, navigate there and look at the README to continue"
+        puts "Lab downloaded to lab/#{content["s3_key"]}."
+        puts "Navigate there and look at the README to continue"
       when "text"
-        puts "Opening in your editor: #{content["title"]}"
-        exec("$EDITOR text/#{content["s3_key"]}")
+        puts "Viewing: #{content["title"]}"
+        puts "Location: text/#{content["s3_key"]}"
       when "cgrp"
-        puts "The Complete Guide to Rails Performance has been downloaded and extracted to the cgrp directory."
+        puts "The Complete Guide to Rails Performance has been downloaded and extracted to the ./cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
     end

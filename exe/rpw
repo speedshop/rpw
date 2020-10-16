@@ -102,20 +102,54 @@ module RPW
       true
     end
 
+    desc "start", "Tutorial and onboarding"
+
+    def start
+      print_banner
+      say "Welcome to the Rails Performance Workshop."
+      say ""
+      say "This is rpw, the command line client for this workshop."
+      say ""
+      say "This client will download files from the internet into the current"
+      say "working directory, so it's best to run this client from a new directory"
+      say "that you'll use as your 'scratch space' for working on the Workshop."
+      say ""
+      return unless yes? "Are you in a directory that we can safely add new folders and files to? (Y/N)"
+      puts ""
+      setup
+      puts ""
+      say "Here are some important commands for you to know:"
+      say "$ rpw lesson next     | Proceed to the next part of the workshop."
+      say "$ rpw lesson complete | Mark current lesson as complete."
+      say "$ rpw lesson list     | List all workshop lessons. Note each lesson is preceded with an ID."
+      say "$ rpw lesson download | Download any or all lessons."
+      say "$ rpw lesson show     | Show any particular workshop lesson."
+      say "$ rpw progress        | Show where you're currently at in the workshop."
+      say "$ rpw help            | Help! You can also ask in Slack."
+      puts ""
+      say "Generally, you'll just be doing a lot of $ rpw lesson next"
+      say "Remember to ask on Slack for help if you get stuck or encounter bugs."
+      say "Let's get going! $ rpw lesson next"
+    end
+
     desc "setup", "Set up purchase key and directories"
 
     def setup
-      return unless
       say "We'll create a .rpw_key file at #{File.expand_path("~/.rpw")} to save your purchase key."
       key = ask("Your Purchase Key: ")
 
       client.setup(key)
 
+      puts ""
+
       say "Successfully authenticated with the RPW server and saved your key."
 
-      return unless yes? "rpw works by downloading files into the current working directory. \
-        We're going to (idempotently!) create a few directories in the current working directory. \
-        Is that OK? (Y/N)"
+      puts ""
+
+      say "rpw works by downloading files into the current working directory."
+      say "We're going to (idempotently!) create a few directories in the current working directory."
+      puts ""
+      return unless yes? "Is that OK? (Y/N)"
 
       client.directory_setup
 
@@ -131,6 +165,60 @@ module RPW
 
     def client
       @client ||= RPW::Client.new
+    end
+
+    def print_banner
+      puts r
+      if `tput cols 80`.to_i < 80
+        puts small_banner
+      else
+        puts banner
+      end
+      puts reset
+    end
+
+    def r
+      "\e[31m"
+    end
+
+    def reset
+      "\e[0m"
+    end
+
+    def small_banner
+      %(
+   _____ _          _____     _ _
+  |_   _| |_ ___   | __  |___|_| |___
+    | | |   | -_|  |    -| .'| | |_ -|
+    |_| |_|_|___|  |__|__|__,|_|_|___|
+   _____         ___
+  |  _  |___ ___|  _|___ ___ _____ ___ ___ ___ ___
+  |   __| -_|  _|  _| . |  _|     | .'|   |  _| -_|
+  |__|  |___|_| |_| |___|_| |_|_|_|__,|_|_|___|___|
+   _ _ _         _       _
+  | | | |___ ___| |_ ___| |_ ___ ___
+  | | | | . |  _| '_|_ -|   | . | . |
+  |_____|___|_| |_,_|___|_|_|___|  _|
+                                |_|
+        #{reset})
+    end
+
+    def banner
+      %(
+                                _____ _          _____     _ _
+     +hmNMMMMMm/`  -ymMMNh/    |_   _| |_ ___   | __  |___|_| |___
+     sMMMMMMMMMy   +MMMMMMMMy    | | |   | -_|  |    -| .'| | |_ -|
+     yMMMMMMMMMMy` yMMMMMMMMN    |_| |_|_|___|  |__|__|__,|_|_|___|
+     `dMMMMMMMMMMm:-dMMMMMMm:   _____         ___
+      `sNMMMMMMMMMMs.:+sso:`   |  _  |___ ___|  _|___ ___ _____ ___ ___ ___ ___
+        :dMMMMMMMMMMm/         |   __| -_|  _|  _| . |  _|     | .'|   |  _| -_|
+   `:oss+:.sNMMMMMMMMMMy`      |__|  |___|_| |_| |___|_| |_|_|_|__,|_|_|___|___|
+   /mMMMMMMd-:mMMMMMMMMMMd.     _ _ _         _       _
+   NMMMMMMMMy `hMMMMMMMMMMh    | | | |___ ___| |_ ___| |_ ___ ___
+   yMMMMMMMM+  `dMMMMMMMMMy    | | | | . |  _| '_|_ -|   | . | . |
+   /hNMMmy-  `/mMMMMMNmy/      |_____|___|_| |_,_|___|_|_|___|  _|
+                                                             |_|
+        #{reset})
     end
   end
 end
