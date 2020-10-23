@@ -301,7 +301,7 @@ module RPW
       puts data["prompt"]
       data["answer_choices"].each { |ac| puts ac }
       provided_answer = ask("Your answer?")
-      answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer)
+      answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer.upcase)
       if answer_digest == data["answer_digest"]
         say "Correct!"
       else
