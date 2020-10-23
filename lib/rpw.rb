@@ -1,5 +1,6 @@
 require "typhoeus"
 require "json"
+require_relative "rpw/version" 
 
 module RPW
   class Error < StandardError; end
@@ -48,6 +49,12 @@ module RPW
       end
       request.on_complete { |response| downloaded_file.close }
       request
+    end
+
+    def latest_version?
+      resp = Typhoeus.get("https://rubygems.org/api/v1/gems/rpw.json")
+      data = JSON.parse resp.body 
+      Gem::Version.new(RPW::VERSION) >= Gem::Version.new(data["version"])
     end
   end
 
@@ -146,6 +153,25 @@ module RPW
     def reset_progress
       client_data["current_lesson"] = 0
       client_data["completed"] = []
+    end
+
+    def latest_version?
+      if client_data["last_version_check"]
+        return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24) 
+        return false if client_data["last_version_check"] = false 
+      end 
+
+      begin 
+        latest = gateway.latest_version?
+      rescue 
+        return true 
+      end 
+
+      if latest
+        client_data["last_version_check"] = Time.now
+      else 
+        client_data["last_version_check"] = false 
+      end
     end
 
     private

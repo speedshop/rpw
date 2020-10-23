@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "thor"
+require "thor/hollaback"
 require_relative "../lib/rpw"
 
 module RPW
@@ -93,6 +94,8 @@ module RPW
   end
 
   class CLI < Thor
+    class_before :check_version
+
     desc "lesson [SUBCOMMAND]", "View and download lessons"
     subcommand "lesson", Lesson
     desc "progress [SUBCOMMAND]", "View and set progress"
@@ -165,6 +168,13 @@ module RPW
 
     def client
       @client ||= RPW::Client.new
+    end
+
+    def check_version
+      unless client.latest_version?
+        say "WARNING: You are running an old version of rpw."
+        say "WARNING: Please run 'gem install rpw'"
+      end
     end
 
     def print_banner
