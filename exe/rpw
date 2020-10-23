@@ -16,11 +16,13 @@ module RPW
   end
 
   class Lesson < SubCommandBase
+    class_before :exit_with_no_key
+    
     desc "next", "Proceed to the next lesson of the workshop"
-
+    option :open
     def next
       say "Proceeding to next lesson..."
-      client.next
+      client.next(options[:open])
     end
 
     desc "complete", "Mark the current lesson as complete"
@@ -46,9 +48,9 @@ module RPW
     end
 
     desc "show [CONTENT]", "Show any workshop lesson"
-
+    option :open
     def show(content)
-      client.show(content)
+      client.show(content, options[:open])
     end
 
     private
@@ -56,9 +58,15 @@ module RPW
     def client
       @client ||= RPW::Client.new
     end
+
+    def exit_with_no_key
+      exit(1) unless client.setup?
+    end
   end
 
   class Progress < SubCommandBase
+    class_before :exit_with_no_key
+
     desc "set [LESSON]", "Set current lesson to a particular lesson"
 
     def set(lesson)
@@ -90,11 +98,16 @@ module RPW
       @client ||= RPW::Client.new
     end
 
+    def exit_with_no_key
+      exit(1) unless client.setup?
+    end
+
     default_task :show
   end
 
   class CLI < Thor
     class_before :check_version
+    class_before :check_setup
 
     desc "lesson [SUBCOMMAND]", "View and download lessons"
     subcommand "lesson", Lesson
@@ -119,25 +132,6 @@ module RPW
       say ""
       return unless yes? "Are you in a directory that we can safely add new folders and files to? (Y/N)"
       puts ""
-      setup
-      puts ""
-      say "Here are some important commands for you to know:"
-      say "$ rpw lesson next     | Proceed to the next part of the workshop."
-      say "$ rpw lesson complete | Mark current lesson as complete."
-      say "$ rpw lesson list     | List all workshop lessons. Note each lesson is preceded with an ID."
-      say "$ rpw lesson download | Download any or all lessons."
-      say "$ rpw lesson show     | Show any particular workshop lesson."
-      say "$ rpw progress        | Show where you're currently at in the workshop."
-      say "$ rpw help            | Help! You can also ask in Slack."
-      puts ""
-      say "Generally, you'll just be doing a lot of $ rpw lesson next"
-      say "Remember to ask on Slack for help if you get stuck or encounter bugs."
-      say "Let's get going! $ rpw lesson next"
-    end
-
-    desc "setup", "Set up purchase key and directories"
-
-    def setup
       say "We'll create a .rpw_key file at #{File.expand_path("~/.rpw")} to save your purchase key."
       key = ask("Your Purchase Key: ")
 
@@ -157,11 +151,19 @@ module RPW
       client.directory_setup
 
       say "Setup complete!"
-    end
-
-    desc "support", "Create a new support ticket, report a bug or issue"
-
-    def support
+      puts ""
+      say "Here are some important commands for you to know:"
+      say "$ rpw lesson next     | Proceed to the next part of the workshop."
+      say "$ rpw lesson complete | Mark current lesson as complete."
+      say "$ rpw lesson list     | List all workshop lessons. Note each lesson is preceded with an ID."
+      say "$ rpw lesson download | Download any or all lessons."
+      say "$ rpw lesson show     | Show any particular workshop lesson."
+      say "$ rpw progress        | Show where you're currently at in the workshop."
+      say "$ rpw help            | Help! You can also ask in Slack."
+      puts ""
+      say "Generally, you'll just be doing a lot of $ rpw lesson next"
+      say "Remember to ask on Slack for help if you get stuck or encounter bugs."
+      say "Let's get going! $ rpw lesson next"
     end
 
     private
@@ -172,8 +174,14 @@ module RPW
 
     def check_version
       unless client.latest_version?
-        say "WARNING: You are running an old version of rpw."
-        say "WARNING: Please run 'gem install rpw'"
+        say "#{r}WARNING: You are running an old version of rpw."
+        say "WARNING: Please run `$ gem install rpw`#{reset}"
+      end
+    end
+
+    def check_setup
+      unless client.setup? || current_command_chain == [:start]
+        say "#{r}WARNING: You do not have a purchase key set. Run `$ rpw start`#{reset}"
       end
     end
 

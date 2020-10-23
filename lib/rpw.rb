@@ -87,14 +87,14 @@ module RPW
       end
     end
 
-    def next
+    def next(open_after = false)
       content = next_content
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
-      display_content(content)
+      display_content(content, open_after)
     end
 
     def complete
@@ -106,14 +106,14 @@ module RPW
       gateway.list_content
     end
 
-    def show(content_pos)
+    def show(content_pos, open_after = false)
       content = gateway.get_content_by_position(content_pos)
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
-      display_content(content)
+      display_content(content, open_after)
     end
 
     def download(content_pos)
@@ -174,6 +174,10 @@ module RPW
       end
     end
 
+    def setup?
+      keyfile["key"]
+    end
+
     private
 
     def chart_section_progress(contents)
@@ -219,22 +223,39 @@ module RPW
       `tar -C #{folder} -xvzf #{folder}/#{content["s3_key"]}`
     end
 
-    def display_content(content)
+    def display_content(content, open_after)
       puts "Viewing: #{content["title"]}"
       case content["style"]
       when "video"
-        puts "Location: video/#{content["s3_key"]}"
+        location = "video/#{content["s3_key"]}"
       when "quiz"
         Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
       when "lab"
-        puts "Lab downloaded to lab/#{content["s3_key"]}."
-        puts "Navigate there and look at the README to continue"
+        location = "lab/#{content["s3_key"]}"
       when "text"
-        puts "Viewing: #{content["title"]}"
-        puts "Location: text/#{content["s3_key"]}"
+        location = "lab/#{content["s3_key"]}"
       when "cgrp"
         puts "The Complete Guide to Rails Performance has been downloaded and extracted to the ./cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
+      end
+      if location
+        puts "Downloaded to #{location}"
+        if open_after
+          exec "#{open_command} #{location}"
+        end
+      end
+    end
+
+    require "rbconfig"
+    def open_command
+      host_os = RbConfig::CONFIG['host_os']
+      case host_os
+      when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+        "start"
+      when /darwin|mac os/
+        "open"
+      else 
+        "xdg-open"
       end
     end
   end
