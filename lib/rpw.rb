@@ -45,7 +45,7 @@ module RPW
       request = Typhoeus::Request.new(content["url"])
       request.on_body do |chunk|
         downloaded_file.write(chunk)
-        printf(".") if rand(10) == 0 # lol
+        printf(".") if rand(500) == 0 # lol
       end
       request.on_complete { |response| downloaded_file.close }
       request
@@ -88,6 +88,7 @@ module RPW
     end
 
     def next(open_after = false)
+      complete
       content = next_content
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
@@ -98,8 +99,9 @@ module RPW
     end
 
     def complete
+      reset_progress unless client_data["current_lesson"] && client_data["completed"]
       client_data["completed"] ||= []
-      client_data["completed"] += [client_data["current_lesson"]]
+      client_data["completed"] += [client_data["current_lesson"] || 0]
     end
 
     def list
@@ -107,6 +109,7 @@ module RPW
     end
 
     def show(content_pos, open_after = false)
+      content_pos = client_data["current_lesson"] if content_pos == :current
       content = gateway.get_content_by_position(content_pos)
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
@@ -142,7 +145,7 @@ module RPW
         completed: client_data["completed"].size,
         total: contents.size,
         current_lesson: contents.find { |c| c["position"] == client_data["current_lesson"] },
-        sections: chart_section_progress(contents)
+        sections: chart_section_progress(contentsi)
       }
     end
 
@@ -158,7 +161,7 @@ module RPW
     def latest_version?
       if client_data["last_version_check"]
         return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24) 
-        return false if client_data["last_version_check"] = false 
+        return false if client_data["last_version_check"] == false 
       end 
 
       begin 
@@ -266,15 +269,18 @@ module RPW
   class ClientData
     DOTFILE_NAME = ".rpw_info"
 
-    def [](key)
+    def initialize
       make_sure_dotfile_exists
+      data # access file to load
+    end
+
+    def [](key)
       data[key]
     end
 
     def []=(key, value)
+      data
       data[key] = value
-
-      create_client_data_directory(filestore_location)
 
       begin
         File.open(filestore_location, "w") { |f| f.write(YAML.dump(data)) }
@@ -301,28 +307,23 @@ module RPW
 
     def create_client_data_directory(path)
       dirname = File.dirname(path)
-      unless File.directory?(dirname)
-        FileUtils.mkdir_p(dirname)
-      end
+      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
     end
 
     def data
-      @data ||= begin
-        yaml = begin
-          YAML.safe_load(File.read(self.class::DOTFILE_NAME))
-        rescue
-          nil
-        end
+      @data ||= begin 
+        yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time]) rescue nil 
         yaml || {}
       end
     end
 
     def make_sure_dotfile_exists
-      return true if File.exist?(self.class::DOTFILE_NAME)
+      return true if File.exist?(filestore_location)
+      create_client_data_directory(filestore_location)
       begin
-        FileUtils.touch(self.class::DOTFILE_NAME)
+        FileUtils.touch(filestore_location)
       rescue
-        raise Error, "Could not create the RPW data file in this directory \
+        raise Error, "Could not create the RPW data file at ~/.rpw/ \
                       Check your file permissions."
       end
     end
@@ -339,6 +340,7 @@ module RPW
     desc "give_quiz FILENAME", ""
     def give_quiz(filename)
       @quiz_data = YAML.safe_load(File.read(filename))
+      binding.irb
       @quiz_data["questions"].each { |q| question(q) }
     end
 

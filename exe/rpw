@@ -17,7 +17,7 @@ module RPW
 
   class Lesson < SubCommandBase
     class_before :exit_with_no_key
-    
+
     desc "next", "Proceed to the next lesson of the workshop"
     option :open
     def next
@@ -47,9 +47,9 @@ module RPW
       client.download(content)
     end
 
-    desc "show [CONTENT]", "Show any workshop lesson"
+    desc "show [CONTENT]", "Show any workshop lesson, shows current lesson w/no arguments"
     option :open
-    def show(content)
+    def show(content = :current)
       client.show(content, options[:open])
     end
 
