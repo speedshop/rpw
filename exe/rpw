@@ -13,6 +13,20 @@ module RPW
     def self.subcommand_prefix
       name.gsub(%r{.*::}, "").gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" }
     end
+
+    no_commands do 
+      def client
+        @client ||= RPW::Client.new
+      end
+    end
+  end
+
+  class Key < SubCommandBase
+    desc "register [EMAIL_ADDRESS]", "Change email registered with Speedshop. One-time only."
+    def register(email)
+      client.register_email(email)
+      say "License registered. You should receive a Slack invite soon."
+    end
   end
 
   class Lesson < SubCommandBase
@@ -55,10 +69,6 @@ module RPW
 
     private
 
-    def client
-      @client ||= RPW::Client.new
-    end
-
     def exit_with_no_key
       exit(1) unless client.setup?
     end
@@ -94,10 +104,6 @@ module RPW
 
     private
 
-    def client
-      @client ||= RPW::Client.new
-    end
-
     def exit_with_no_key
       exit(1) unless client.setup?
     end
@@ -109,6 +115,8 @@ module RPW
     class_before :check_version
     class_before :check_setup
 
+    desc "key register [EMAIL_ADDRESS]", "Change email registered w/Speedshop"
+    subcommand "key", Key
     desc "lesson [SUBCOMMAND]", "View and download lessons"
     subcommand "lesson", Lesson
     desc "progress [SUBCOMMAND]", "View and set progress"
@@ -132,7 +140,9 @@ module RPW
       say ""
       return unless yes? "Are you in a directory that we can safely add new folders and files to? (Y/N)"
       puts ""
-      say "We'll create a .rpw_key file at #{File.expand_path("~/.rpw")} to save your purchase key."
+      say "We'll create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
+      home_dir_ok = yes?("Is this OK? (Y/N) (N will create it in the current directory)")
+      
       key = ask("Your Purchase Key: ")
 
       client.setup(key)

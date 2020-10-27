@@ -56,6 +56,10 @@ module RPW
       data = JSON.parse resp.body 
       Gem::Version.new(RPW::VERSION) >= Gem::Version.new(data["version"])
     end
+
+    def register_email(email)
+      Typhoeus.put(domain + "/license", params: { email: email, key: @key })
+    end
   end
 
   class Client
@@ -63,7 +67,11 @@ module RPW
 
     def setup(key)
       gateway.authenticate_key(key)
-      keyfile["key"] = key
+      client_data["key"] = key
+    end
+
+    def register_email(email)
+      gateway.register_email(email)
     end
 
     def directory_setup
@@ -178,7 +186,7 @@ module RPW
     end
 
     def setup?
-      keyfile["key"]
+      client_data["key"]
     end
 
     private
@@ -213,12 +221,8 @@ module RPW
       @client_data ||= ClientData.new
     end
 
-    def keyfile
-      @keyfile ||= Keyfile.new
-    end
-
     def gateway
-      @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, keyfile["key"])
+      @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, client_data["key"])
     end
 
     def extract_content(content)
@@ -296,7 +300,11 @@ module RPW
     end
 
     def self.filestore_location
-      File.expand_path("~/.rpw/" + self::DOTFILE_NAME)
+      if File.exist?(File.expand_path("./" + self::DOTFILE_NAME))
+        File.expand_path("./" +  + self::DOTFILE_NAME)
+      else
+        File.expand_path("~/.rpw/" + self::DOTFILE_NAME)
+      end
     end
 
     private
@@ -312,7 +320,7 @@ module RPW
 
     def data
       @data ||= begin 
-        yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time]) rescue nil 
+        yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time])
         yaml || {}
       end
     end
@@ -327,10 +335,6 @@ module RPW
                       Check your file permissions."
       end
     end
-  end
-
-  class Keyfile < ClientData
-    DOTFILE_NAME = ".rpw_key"
   end
 
   require "digest"
