@@ -176,6 +176,18 @@ module RPW
       say "Let's get going! $ rpw lesson next"
     end
 
+    no_commands do 
+      def print_banner
+        puts r
+        if `tput cols 80`.to_i < 80
+          puts small_banner
+        else
+          puts banner
+        end
+        puts reset
+      end
+    end
+
     private
 
     def client
@@ -193,16 +205,6 @@ module RPW
       unless client.setup? || current_command_chain == [:start]
         say "#{r}WARNING: You do not have a purchase key set. Run `$ rpw start`#{reset}"
       end
-    end
-
-    def print_banner
-      puts r
-      if `tput cols 80`.to_i < 80
-        puts small_banner
-      else
-        puts banner
-      end
-      puts reset
     end
 
     def r

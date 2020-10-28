@@ -98,6 +98,11 @@ module RPW
     def next(open_after = false)
       complete
       content = next_content
+      if content.nil?
+        finished_workshop
+        return 
+      end 
+      
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
@@ -191,6 +196,12 @@ module RPW
 
     private
 
+    def finished_workshop
+      RPW::CLI.new.print_banner
+      puts "Congratulations!"
+      puts "You have completed the Rails Performance Workshop."
+    end
+
     def chart_section_progress(contents)
       contents.group_by { |c| c["position"] / 100 }
         .each_with_object([]) do |(_, c), memo|
@@ -231,7 +242,7 @@ module RPW
     end
 
     def display_content(content, open_after)
-      puts "Viewing: #{content["title"]}"
+      puts "\nCurrent Lesson: #{content["title"]}"
       case content["style"]
       when "video"
         location = "video/#{content["s3_key"]}"
@@ -246,7 +257,8 @@ module RPW
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
       if location
-        puts "Downloaded to #{location}"
+        puts "Downloaded to:"
+        puts "#{location}"
         if open_after
           exec "#{open_command} #{location}"
         end
@@ -344,7 +356,6 @@ module RPW
     desc "give_quiz FILENAME", ""
     def give_quiz(filename)
       @quiz_data = YAML.safe_load(File.read(filename))
-      binding.irb
       @quiz_data["questions"].each { |q| question(q) }
     end
 
@@ -361,6 +372,7 @@ module RPW
         say "Incorrect."
         say "I encourage you to try reviewing the material to see what the correct answer is."
       end
+      say ""
     end
   end
 end
