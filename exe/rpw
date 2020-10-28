@@ -138,10 +138,10 @@ module RPW
       say "working directory, so it's best to run this client from a new directory"
       say "that you'll use as your 'scratch space' for working on the Workshop."
       say ""
-      return unless yes? "Are you in a directory that we can safely add new folders and files to? (Y/N)"
+      return unless yes? "Are you in a directory that we can safely add new folders and files to? (y/N)"
       puts ""
       say "We'll create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
-      home_dir_ok = yes?("Is this OK? (Y/N) (N will create it in the current directory)")
+      home_dir_ok = yes?("Is this OK? (y/N) (N will create it in the current directory)")
 
       key = ask("Your Purchase Key: ")
 
@@ -156,7 +156,7 @@ module RPW
       say "rpw works by downloading files into the current working directory."
       say "We're going to (idempotently!) create a few directories in the current working directory."
       puts ""
-      return unless yes? "Is that OK? (Y/N)"
+      return unless yes? "Is that OK? (y/N)"
 
       client.directory_setup
 
