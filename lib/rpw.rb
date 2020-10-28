@@ -158,7 +158,7 @@ module RPW
         completed: client_data["completed"].size,
         total: contents.size,
         current_lesson: contents.find { |c| c["position"] == client_data["current_lesson"] },
-        sections: chart_section_progress(contentsi)
+        sections: chart_section_progress(contents)
       }
     end
 
