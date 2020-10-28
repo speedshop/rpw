@@ -1,6 +1,6 @@
 require "typhoeus"
 require "json"
-require_relative "rpw/version" 
+require_relative "rpw/version"
 
 module RPW
   class Error < StandardError; end
@@ -53,12 +53,12 @@ module RPW
 
     def latest_version?
       resp = Typhoeus.get("https://rubygems.org/api/v1/gems/rpw.json")
-      data = JSON.parse resp.body 
+      data = JSON.parse resp.body
       Gem::Version.new(RPW::VERSION) >= Gem::Version.new(data["version"])
     end
 
     def register_email(email)
-      Typhoeus.put(domain + "/license", params: { email: email, key: @key })
+      Typhoeus.put(domain + "/license", params: {email: email, key: @key})
     end
   end
 
@@ -100,9 +100,9 @@ module RPW
       content = next_content
       if content.nil?
         finished_workshop
-        return 
-      end 
-      
+        return
+      end
+
       unless File.exist?(content["style"] + "/" + content["s3_key"])
         gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
@@ -173,20 +173,20 @@ module RPW
 
     def latest_version?
       if client_data["last_version_check"]
-        return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24) 
-        return false if client_data["last_version_check"] == false 
-      end 
+        return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24)
+        return false if client_data["last_version_check"] == false
+      end
 
-      begin 
+      begin
         latest = gateway.latest_version?
-      rescue 
-        return true 
-      end 
+      rescue
+        return true
+      end
 
-      if latest
-        client_data["last_version_check"] = Time.now
-      else 
-        client_data["last_version_check"] = false 
+      client_data["last_version_check"] = if latest
+        Time.now
+      else
+        false
       end
     end
 
@@ -258,7 +258,7 @@ module RPW
       end
       if location
         puts "Downloaded to:"
-        puts "#{location}"
+        puts location.to_s
         if open_after
           exec "#{open_command} #{location}"
         end
@@ -267,13 +267,13 @@ module RPW
 
     require "rbconfig"
     def open_command
-      host_os = RbConfig::CONFIG['host_os']
+      host_os = RbConfig::CONFIG["host_os"]
       case host_os
       when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
         "start"
       when /darwin|mac os/
         "open"
-      else 
+      else
         "xdg-open"
       end
     end
@@ -313,7 +313,7 @@ module RPW
 
     def self.filestore_location
       if File.exist?(File.expand_path("./" + self::DOTFILE_NAME))
-        File.expand_path("./" +  + self::DOTFILE_NAME)
+        File.expand_path("./" + + self::DOTFILE_NAME)
       else
         File.expand_path("~/.rpw/" + self::DOTFILE_NAME)
       end
@@ -331,7 +331,7 @@ module RPW
     end
 
     def data
-      @data ||= begin 
+      @data ||= begin
         yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time])
         yaml || {}
       end

@@ -14,7 +14,7 @@ module RPW
       name.gsub(%r{.*::}, "").gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" }
     end
 
-    no_commands do 
+    no_commands do
       def client
         @client ||= RPW::Client.new
       end
@@ -142,7 +142,7 @@ module RPW
       puts ""
       say "We'll create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
       home_dir_ok = yes?("Is this OK? (Y/N) (N will create it in the current directory)")
-      
+
       key = ask("Your Purchase Key: ")
 
       client.setup(key)
@@ -176,7 +176,7 @@ module RPW
       say "Let's get going! $ rpw lesson next"
     end
 
-    no_commands do 
+    no_commands do
       def print_banner
         puts r
         if `tput cols 80`.to_i < 80
