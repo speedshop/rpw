@@ -74,12 +74,16 @@ module RPW
       gateway.register_email(email)
     end
 
-    def directory_setup
+    def directory_setup(home_dir_ok = true)
       ["video", "quiz", "lab", "text", "cgrp"].each do |path|
         FileUtils.mkdir_p(path) unless File.directory?(path)
       end
 
-      client_data["completed"] = [] # just to write the file
+      if home_dir_ok
+        ClientData.create_in_home!
+      else 
+        ClientData.create_in_pwd!
+      end
 
       unless File.exist?(".gitignore") && File.read(".gitignore").match(/rpw_key/)
         File.open(".gitignore", "a") do |f|
@@ -94,8 +98,8 @@ module RPW
         end
       end
 
-      File.open("README.md", "w+") do |f| 
-        f.puts File.read(File.join(File.dirname(__FILE__), 'README.md'))
+      File.open("README.md", "w+") do |f|
+        f.puts File.read(File.join(File.dirname(__FILE__), "README.md"))
       end
     end
 
@@ -176,6 +180,8 @@ module RPW
     end
 
     def latest_version?
+      return true unless ClientData.exists? 
+
       if client_data["last_version_check"]
         return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24)
         return false if client_data["last_version_check"] == false
@@ -195,6 +201,7 @@ module RPW
     end
 
     def setup?
+      return false unless ClientData.exists? 
       client_data["key"]
     end
 
@@ -300,7 +307,6 @@ module RPW
     DOTFILE_NAME = ".rpw_info"
 
     def initialize
-      make_sure_dotfile_exists
       data # access file to load
     end
 
@@ -320,16 +326,29 @@ module RPW
       end
     end
 
+    def self.create_in_pwd!
+      FileUtils.touch(File.expand_path("./" + DOTFILE_NAME))
+    end
+
+    def self.create_in_home!
+      FileUtils.mkdir_p("~/.rpw/") unless File.directory?("~/.rpw/")
+      FileUtils.touch(File.expand_path("~/.rpw/" + DOTFILE_NAME))
+    end
+
     def self.delete_filestore
       return unless File.exist?(filestore_location)
       FileUtils.remove(filestore_location)
     end
 
+    def self.exists? 
+      File.exist? filestore_location
+    end
+
     def self.filestore_location
-      if File.exist?(File.expand_path("./" + self::DOTFILE_NAME))
-        File.expand_path("./" + + self::DOTFILE_NAME)
+      if File.exist?(File.expand_path("./" + DOTFILE_NAME))
+        File.expand_path("./" + DOTFILE_NAME)
       else
-        File.expand_path("~/.rpw/" + self::DOTFILE_NAME)
+        File.expand_path("~/.rpw/" + DOTFILE_NAME)
       end
     end
 
@@ -339,26 +358,10 @@ module RPW
       self.class.filestore_location
     end
 
-    def create_client_data_directory(path)
-      dirname = File.dirname(path)
-      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
-    end
-
     def data
       @data ||= begin
         yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time])
         yaml || {}
-      end
-    end
-
-    def make_sure_dotfile_exists
-      return true if File.exist?(filestore_location)
-      create_client_data_directory(filestore_location)
-      begin
-        FileUtils.touch(filestore_location)
-      rescue
-        raise Error, "Could not create the RPW data file at ~/.rpw/ \
-                      Check your file permissions."
       end
     end
   end

@@ -21,10 +21,10 @@ module RPW
 
       def exit_with_no_key
         unless client.setup?
-          say "You have not yet set up the client. Run $ rpw start" 
+          say "You have not yet set up the client. Run $ rpw start"
           exit(1)
         end
-        unless client.directories_ready? 
+        unless client.directories_ready?
           say "You are not in your workshop scratch directory, or you have not yet"
           say "set up the client. Change directory or run $ rpw start"
           exit(1)
@@ -79,7 +79,6 @@ module RPW
       client.show(content, options[:open])
     end
   end
-
 
   class Progress < SubCommandBase
     class_before :exit_with_no_key
@@ -143,23 +142,19 @@ module RPW
       say "working directory, so it's best to run this client from a new directory"
       say "that you'll use as your 'scratch space' for working on the Workshop."
       say ""
-      return unless yes? "Are you in a directory that we can safely add new folders and files to? (y/N)"
+      say "We will create a handful of new files and folders in the current directory."
+      return unless yes? "Is this OK? (y/N) (N will quit)"
       puts ""
       say "We'll also create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
       home_dir_ok = yes?("Is this OK? (y/N) (N will create it in the current directory)")
+      client.directory_setup(home_dir_ok)
 
       key = ask("Your Purchase Key: ")
 
       client.setup(key)
-
       puts ""
-
       say "Successfully authenticated with the RPW server and saved your key."
-
       puts ""
-
-      client.directory_setup
-
       say "Setup complete!"
       puts ""
       say "To learn how to use this command-line client, consult README.md."
