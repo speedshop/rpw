@@ -93,6 +93,10 @@ module RPW
           f.puts "cgrp\n"
         end
       end
+
+      File.open("README.md", "w+") do |f| 
+        f.puts File.read(File.join(File.dirname(__FILE__), 'README.md'))
+      end
     end
 
     def next(open_after = false)

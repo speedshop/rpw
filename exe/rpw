@@ -129,6 +129,8 @@ module RPW
     desc "start", "Tutorial and onboarding"
 
     def start
+      warn_if_already_started
+
       print_banner
       say "Welcome to the Rails Performance Workshop."
       say ""
@@ -140,7 +142,7 @@ module RPW
       say ""
       return unless yes? "Are you in a directory that we can safely add new folders and files to? (y/N)"
       puts ""
-      say "We'll create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
+      say "We'll also create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
       home_dir_ok = yes?("Is this OK? (y/N) (N will create it in the current directory)")
 
       key = ask("Your Purchase Key: ")
@@ -153,27 +155,13 @@ module RPW
 
       puts ""
 
-      say "rpw works by downloading files into the current working directory."
-      say "We're going to (idempotently!) create a few directories in the current working directory."
-      puts ""
-      return unless yes? "Is that OK? (y/N)"
-
       client.directory_setup
 
       say "Setup complete!"
       puts ""
-      say "Here are some important commands for you to know:"
-      say "$ rpw lesson next     | Proceed to the next part of the workshop."
-      say "$ rpw lesson complete | Mark current lesson as complete."
-      say "$ rpw lesson list     | List all workshop lessons. Note each lesson is preceded with an ID."
-      say "$ rpw lesson download | Download any or all lessons."
-      say "$ rpw lesson show     | Show any particular workshop lesson."
-      say "$ rpw progress        | Show where you're currently at in the workshop."
-      say "$ rpw help            | Help! You can also ask in Slack."
-      puts ""
-      say "Generally, you'll just be doing a lot of $ rpw lesson next"
+      say "To learn how to use this command-line client, consult README.md."
       say "Remember to ask on Slack for help if you get stuck or encounter bugs."
-      say "Let's get going! $ rpw lesson next"
+      say "Once you're ready to get going: $ rpw lesson next"
     end
 
     no_commands do
@@ -192,6 +180,11 @@ module RPW
 
     def client
       @client ||= RPW::Client.new
+    end
+
+    def warn_if_already_started
+      return unless client.setup?
+      exit(0) unless yes? "You have already started the workshop. Continuing this command will wipe all of your current progress. Continue? (y/N)"
     end
 
     def check_version
