@@ -81,7 +81,7 @@ module RPW
 
       if home_dir_ok
         ClientData.create_in_home!
-      else 
+      else
         ClientData.create_in_pwd!
       end
 
@@ -180,7 +180,7 @@ module RPW
     end
 
     def latest_version?
-      return true unless ClientData.exists? 
+      return true unless ClientData.exists?
 
       if client_data["last_version_check"]
         return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24)
@@ -201,7 +201,7 @@ module RPW
     end
 
     def setup?
-      return false unless ClientData.exists? 
+      return false unless ClientData.exists?
       client_data["key"]
     end
 
@@ -340,7 +340,7 @@ module RPW
       FileUtils.remove(filestore_location)
     end
 
-    def self.exists? 
+    def self.exists?
       File.exist? filestore_location
     end
 

@@ -1,3 +1,7 @@
+## 0.0.5
+
+* more bugfixes from beta testers
+
 ## 0.0.4
 
 * bugfixes
