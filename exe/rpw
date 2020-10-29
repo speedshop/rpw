@@ -18,6 +18,18 @@ module RPW
       def client
         @client ||= RPW::Client.new
       end
+
+      def exit_with_no_key
+        unless client.setup?
+          say "You have not yet set up the client. Run $ rpw start" 
+          exit(1)
+        end
+        unless client.directories_ready? 
+          say "You are not in your workshop scratch directory, or you have not yet"
+          say "set up the client. Change directory or run $ rpw start"
+          exit(1)
+        end
+      end
     end
   end
 
@@ -66,13 +78,8 @@ module RPW
     def show(content = :current)
       client.show(content, options[:open])
     end
-
-    private
-
-    def exit_with_no_key
-      exit(1) unless client.setup?
-    end
   end
+
 
   class Progress < SubCommandBase
     class_before :exit_with_no_key
@@ -103,10 +110,6 @@ module RPW
     end
 
     private
-
-    def exit_with_no_key
-      exit(1) unless client.setup?
-    end
 
     default_task :show
   end

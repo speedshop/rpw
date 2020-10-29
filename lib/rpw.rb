@@ -198,6 +198,12 @@ module RPW
       client_data["key"]
     end
 
+    def directories_ready?
+      ["video", "quiz", "lab", "text", "cgrp"].all? do |path|
+        File.directory?(path)
+      end
+    end
+
     private
 
     def finished_workshop
