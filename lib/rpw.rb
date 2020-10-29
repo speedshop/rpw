@@ -247,23 +247,27 @@ module RPW
 
     def display_content(content, open_after)
       puts "\nCurrent Lesson: #{content["title"]}"
+      openable = false
       case content["style"]
       when "video"
         location = "video/#{content["s3_key"]}"
+        openable = true
       when "quiz"
         Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
       when "lab"
-        location = "lab/#{content["s3_key"]}"
+        location = "lab/#{content["s3_key"][0..-8]}"
       when "text"
         location = "lab/#{content["s3_key"]}"
+        openable = true
       when "cgrp"
         puts "The Complete Guide to Rails Performance has been downloaded and extracted to the ./cgrp directory."
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
       if location
+        puts "This file can be opened automatically if you add the --open flag." if openable && !open_after
         puts "Downloaded to:"
         puts location.to_s
-        if open_after
+        if open_after && openable
           exec "#{open_command} #{location}"
         end
       end
