@@ -83,7 +83,7 @@ module RPW
 
     def check_setup
       unless client.setup? || current_command_chain == [:start]
-        say "#{r}WARNING: You do not have a purchase key set. Run `$ rpw start`#{reset}"
+        say "WARNING: You do not have a purchase key set. Run `$ rpw start`"
       end
     end
   end

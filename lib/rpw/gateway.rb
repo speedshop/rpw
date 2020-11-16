@@ -41,7 +41,8 @@ module RPW
       downloaded_file = File.open("#{folder}/#{content["s3_key"]}.partial", "w")
       streamer = lambda do |chunk, remaining_bytes, total_bytes|
         downloaded_file.write(chunk)
-        puts "Remaining: #{remaining_bytes.to_f / total_bytes}%" if rand(100) == 0
+        print 13.chr
+        print "Remaining: #{(remaining_bytes.to_f / total_bytes * 100).round(2)}%" 
       end
       Excon.get(content["url"], response_block: streamer)
       downloaded_file.close

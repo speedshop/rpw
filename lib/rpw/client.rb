@@ -51,7 +51,7 @@ module RPW
       end
 
       unless File.exist?(content["style"] + "/" + content["s3_key"])
-        gateway.download_content(content, folder: content["style"]).run
+        gateway.download_content(content, folder: content["style"])
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       complete
@@ -73,7 +73,7 @@ module RPW
       content_pos = client_data["current_lesson"] if content_pos == :current
       content = gateway.get_content_by_position(content_pos)
       unless File.exist?(content["style"] + "/" + content["s3_key"])
-        gateway.download_content(content, folder: content["style"]).run
+        gateway.download_content(content, folder: content["style"])
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
       client_data["current_lesson"] = content["position"]
@@ -83,18 +83,16 @@ module RPW
     def download(content_pos)
       if content_pos.downcase == "all"
         to_download = gateway.list_content
-        hydra = Typhoeus::Hydra.new(max_concurrency: 5)
         to_download.each do |content|
           unless File.exist?(content["style"] + "/" + content["s3_key"])
-            hydra.queue gateway.download_content(content, folder: content["style"])
+            gateway.download_content(content, folder: content["style"])
           end
         end
-        hydra.run
         to_download.each { |content| extract_content(content) if content["s3_key"].end_with?(".tar.gz") }
       else
         content = gateway.get_content_by_position(content_pos)
         unless File.exist?(content["style"] + "/" + content["s3_key"])
-          gateway.download_content(content, folder: content["style"]).run
+          gateway.download_content(content, folder: content["style"])
           extract_content(content) if content["s3_key"].end_with?(".tar.gz")
         end
       end

@@ -1,15 +1,4 @@
-require "minitest/autorun"
-require "rpw"
-
-class TestGateway
-  def method_missing(*args)
-    true
-  end
-
-  def respond_to_missing?(*args)
-    true
-  end
-end
+require_relative "helper"
 
 class TestRPW < Minitest::Test
   LICENSE_KEY = "this-is-a-key"
