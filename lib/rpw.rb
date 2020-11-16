@@ -58,7 +58,7 @@ module RPW
     end
 
     def register_email(email)
-      Excon.put(domain + "/license?email#{email}&key=#{@key}")
+      Excon.put(domain + "/license?email=#{email}&key=#{@key}").status == 200
     end
   end
 
