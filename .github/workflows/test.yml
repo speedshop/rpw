@@ -26,7 +26,12 @@ jobs:
       - name: repo checkout
         uses: actions/checkout@v2
 
-      - name:  bundle install
+      - name: load ruby
+        uses: MSP-Greg/setup-ruby-pkgs@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: bundle install
         run:   |
           bundle install --jobs 4 --retry 3
 
