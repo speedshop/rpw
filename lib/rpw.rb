@@ -162,11 +162,12 @@ module RPW
 
     def progress
       contents = gateway.list_content
+      completed_lessons = client_data["completed"] || []
       {
-        completed: client_data["completed"].size,
+        completed: completed_lessons.size,
         total: contents.size,
         current_lesson: contents.find { |c| c["position"] == client_data["current_lesson"] },
-        sections: chart_section_progress(contents)
+        sections: chart_section_progress(contents, completed_lessons)
       }
     end
 
@@ -219,13 +220,13 @@ module RPW
       puts "You have completed the Rails Performance Workshop."
     end
 
-    def chart_section_progress(contents)
+    def chart_section_progress(contents, completed)
       contents.group_by { |c| c["position"] / 100 }
         .each_with_object([]) do |(_, c), memo|
           completed_str = c.map { |l|
             if l["position"] == client_data["current_lesson"]
               "O"
-            elsif client_data["completed"].include?(l["position"])
+            elsif completed.include?(l["position"])
               "X"
             else
               "."

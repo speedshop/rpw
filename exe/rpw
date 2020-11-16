@@ -101,7 +101,7 @@ module RPW
       data = client.progress
       say "The Rails Performance Workshop"
       say "You have completed #{data[:completed]} out of #{data[:total]} total sections."
-      say "Current lesson: #{data[:current_lesson]["title"]}"
+      say "Current lesson: #{data[:current_lesson]["title"]}" if data[:current_lesson]
       say "Progress by Section (X == completed, O == current):"
       data[:sections].each do |section|
         say "#{section[:title]}: #{section[:progress]}"
