@@ -47,7 +47,7 @@ module RPW
         downloaded_file.write(chunk)
         printf(".") if rand(500) == 0 # lol
       end
-      request.on_complete do |response| 
+      request.on_complete do |response|
         downloaded_file.close
         File.rename(downloaded_file, content["s3_key"])
       end
@@ -283,9 +283,9 @@ module RPW
       if location
         if openable && !open_after
           puts "This file can be opened automatically if you use the --open flag next time."
-          puts "e.g. $ rpw lesson next --open" 
+          puts "e.g. $ rpw lesson next --open"
           puts "Download complete. Open with: $ #{open_command} #{location}"
-        else open_after && openable
+        elsif open_after && openable
           exec "#{open_command} #{location}"
         end
       end
@@ -338,8 +338,8 @@ module RPW
     def self.create_in_home!
       unless File.directory?(File.expand_path("~/.rpw/"))
         FileUtils.mkdir(File.expand_path("~/.rpw/"))
-      end 
-      
+      end
+
       FileUtils.touch(File.expand_path("~/.rpw/" + DOTFILE_NAME))
     end
 

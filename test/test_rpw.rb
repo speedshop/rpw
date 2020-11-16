@@ -27,6 +27,7 @@ class TestRPW < Minitest::Test
       end
     end
     delete_dotfile
+    create_dotfile
   end
 
   def teardown
@@ -53,6 +54,10 @@ class TestRPW < Minitest::Test
   private
 
   def delete_dotfile
-    [RPW::ClientData].each { |f| f.delete_filestore }
+    RPW::ClientData.delete_filestore
+  end
+
+  def create_dotfile
+    RPW::ClientData.create_in_pwd!
   end
 end
