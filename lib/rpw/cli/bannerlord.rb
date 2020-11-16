@@ -1,6 +1,6 @@
 module RPW
   class Bannerlord
-    class << self 
+    class << self
       def print_banner
         puts r
         if `tput cols 80`.to_i < 80
@@ -10,7 +10,7 @@ module RPW
         end
         puts reset
       end
-      
+
       def r
         "\e[31m"
       end

@@ -1,4 +1,4 @@
-module RPW 
+module RPW
   class Lesson < SubCommandBase
     class_before :exit_with_no_key
 
