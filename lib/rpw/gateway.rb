@@ -42,11 +42,11 @@ module RPW
       streamer = lambda do |chunk, remaining_bytes, total_bytes|
         downloaded_file.write(chunk)
         print 13.chr
-        print "Remaining: #{(remaining_bytes.to_f / total_bytes * 100).round(2)}%" 
+        print "Remaining: #{(remaining_bytes.to_f / total_bytes * 100).round(2).to_s.rjust(8)}%" 
       end
       Excon.get(content["url"], response_block: streamer)
       downloaded_file.close
-      File.rename(downloaded_file, content["s3_key"])
+      File.rename(downloaded_file, "#{folder}/#{content["s3_key"]}")
     end
 
     def latest_version?
