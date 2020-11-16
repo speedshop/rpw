@@ -1,4 +1,4 @@
-require "typhoeus"
+require "excon"
 require "json"
 require_relative "rpw/version"
 
@@ -16,12 +16,12 @@ module RPW
     class Error < StandardError; end
 
     def authenticate_key(key)
-      Typhoeus.get(domain + "/license", userpwd: key + ":").success?
+      Excon.get(domain + "/license", user: key).status == 200
     end
 
     def get_content_by_position(position)
-      response = Typhoeus.get(domain + "/contents/positional?position=#{position}", userpwd: @key + ":")
-      if response.success?
+      response = Excon.get(domain + "/contents/positional?position=#{position}", user: @key)
+      if response.status == 200
         JSON.parse(response.body)
       else
         puts response.inspect
@@ -30,8 +30,8 @@ module RPW
     end
 
     def list_content
-      response = Typhoeus.get(domain + "/contents", userpwd: @key + ":")
-      if response.success?
+      response = Excon.get(domain + "/contents", user: @key)
+      if response.status == 200
         JSON.parse(response.body)
       else
         puts response.inspect
@@ -42,26 +42,23 @@ module RPW
     def download_content(content, folder:)
       puts "Downloading #{content["title"]}..."
       downloaded_file = File.open("#{folder}/#{content["s3_key"]}.partial", "w")
-      request = Typhoeus::Request.new(content["url"])
-      request.on_body do |chunk|
+      streamer = lambda do |chunk, remaining_bytes, total_bytes|
         downloaded_file.write(chunk)
-        printf(".") if rand(500) == 0 # lol
+        puts "Remaining: #{remaining_bytes.to_f / total_bytes}%" if rand(100) == 0
       end
-      request.on_complete do |response|
-        downloaded_file.close
-        File.rename(downloaded_file, content["s3_key"])
-      end
-      request
+      Excon.get(content["url"], response_block: streamer)
+      downloaded_file.close
+      File.rename(downloaded_file, content["s3_key"])
     end
 
     def latest_version?
-      resp = Typhoeus.get("https://rubygems.org/api/v1/gems/rpw.json")
+      resp = Excon.get("https://rubygems.org/api/v1/gems/rpw.json")
       data = JSON.parse resp.body
       Gem::Version.new(RPW::VERSION) >= Gem::Version.new(data["version"])
     end
 
     def register_email(email)
-      Typhoeus.put(domain + "/license", params: {email: email, key: @key})
+      Excon.put(domain + "/license?email#{email}&key=#{@key}")
     end
   end
 

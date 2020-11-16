@@ -26,5 +26,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "thor"
   spec.add_dependency "thor-hollaback"
-  spec.add_dependency "typhoeus"
+  spec.add_dependency "excon"
 end

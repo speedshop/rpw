@@ -30,10 +30,6 @@ jobs:
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      
-      - name: install libcurl if windows 
-        if: runner.os == 'Windows'
-        run: choco install curl
 
       - name: bundle install
         run:   |
