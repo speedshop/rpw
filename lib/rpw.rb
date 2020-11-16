@@ -41,13 +41,16 @@ module RPW
 
     def download_content(content, folder:)
       puts "Downloading #{content["title"]}..."
-      downloaded_file = File.open("#{folder}/#{content["s3_key"]}", "w")
+      downloaded_file = File.open("#{folder}/#{content["s3_key"]}.partial", "w")
       request = Typhoeus::Request.new(content["url"])
       request.on_body do |chunk|
         downloaded_file.write(chunk)
         printf(".") if rand(500) == 0 # lol
       end
-      request.on_complete { |response| downloaded_file.close }
+      request.on_complete do |response| 
+        downloaded_file.close
+        File.rename(downloaded_file, content["s3_key"])
+      end
       request
     end
 
@@ -104,7 +107,6 @@ module RPW
     end
 
     def next(open_after = false)
-      complete
       content = next_content
       if content.nil?
         finished_workshop
@@ -115,6 +117,7 @@ module RPW
         gateway.download_content(content, folder: content["style"]).run
         extract_content(content) if content["s3_key"].end_with?(".tar.gz")
       end
+      complete
       client_data["current_lesson"] = content["position"]
       display_content(content, open_after)
     end
@@ -243,7 +246,7 @@ module RPW
       contents = gateway.list_content
       return contents.first unless client_data["completed"]
       contents.delete_if { |c| client_data["completed"].include? c["position"] }
-      contents.min_by { |c| c["position"] }
+      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
     end
 
     def client_data
