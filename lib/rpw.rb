@@ -277,10 +277,11 @@ module RPW
         puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
       end
       if location
-        puts "This file can be opened automatically if you add the --open flag." if openable && !open_after
-        puts "Downloaded to:"
-        puts location.to_s
-        if open_after && openable
+        if openable && !open_after
+          puts "This file can be opened automatically if you use the --open flag next time."
+          puts "e.g. $ rpw lesson next --open" 
+          puts "Download complete. Open with: $ #{open_command} #{location}"
+        else open_after && openable
           exec "#{open_command} #{location}"
         end
       end
@@ -331,7 +332,10 @@ module RPW
     end
 
     def self.create_in_home!
-      FileUtils.mkdir_p("~/.rpw/") unless File.directory?("~/.rpw/")
+      unless File.directory?(File.expand_path("~/.rpw/"))
+        FileUtils.mkdir(File.expand_path("~/.rpw/"))
+      end 
+      
       FileUtils.touch(File.expand_path("~/.rpw/" + DOTFILE_NAME))
     end
 
