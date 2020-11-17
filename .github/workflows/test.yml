@@ -25,11 +25,6 @@ jobs:
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
-      
-      - uses: actions/checkout@master
-        with:
-          repository: speedshop/licensor
-          path: server 
 
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1
@@ -43,5 +38,21 @@ jobs:
       - name: standardrb 
         run: bundle exec standardrb 
 
+      - uses: actions/checkout@master
+        with:
+          repository: speedshop/licensor
+          path: server 
+
+      - name: bundle install the server
+        run:   |
+          bundle install --jobs 4 --retry 3
+        working-directory: ./server
+
+      - name: start the server 
+        run: rails server
+        working-directory: ./server
+
       - name: test
         run: bundle exec rake test
+        env:
+          LIVE_SERVER: true
