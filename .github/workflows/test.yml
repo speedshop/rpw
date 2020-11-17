@@ -25,6 +25,10 @@ jobs:
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
+      
+      - uses: actions/checkout@master
+        with:
+          name: speedshop/licensor
 
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1
@@ -37,6 +41,6 @@ jobs:
 
       - name: standardrb 
         run: bundle exec standardrb 
-        
+
       - name: test
         run: bundle exec rake test
