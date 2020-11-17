@@ -48,41 +48,25 @@ module RPW
       end
     end
 
-    def next(open_after = false)
-      content = next_content
-      if content.nil?
-        finished_workshop
-        return
-      end
-
-      unless File.exist?(content["style"] + "/" + content["s3_key"])
-        gateway.download_content(content, folder: content["style"])
-        extract_content(content) if content["s3_key"].end_with?(".tar.gz")
-      end
-      complete
-      client_data["current_lesson"] = content["position"]
-      display_content(content, open_after)
+    def next
+      contents = gateway.list_content
+      return contents.first unless client_data["completed"]
+      contents.delete_if { |c| client_data["completed"].include? c["position"] }
+      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
     end
 
-    def complete
-      reset_progress unless client_data["current_lesson"] && client_data["completed"]
-      client_data["completed"] ||= []
-      client_data["completed"] += [client_data["current_lesson"] || 0]
+    def increment_current_lesson!(position)
+      mark_current_lesson_as_completed
+      client_data["current_lesson"] = position
     end
 
     def list
       gateway.list_content
     end
 
-    def show(content_pos, open_after = false)
+    def show(content_pos)
       content_pos = client_data["current_lesson"] if content_pos == :current
-      content = gateway.get_content_by_position(content_pos)
-      unless File.exist?(content["style"] + "/" + content["s3_key"])
-        gateway.download_content(content, folder: content["style"])
-        extract_content(content) if content["s3_key"].end_with?(".tar.gz")
-      end
-      client_data["current_lesson"] = content["position"]
-      display_content(content, open_after)
+      gateway.get_content_by_position(content_pos)
     end
 
     def download(content_pos)
@@ -155,12 +139,20 @@ module RPW
       end
     end
 
+    def download_and_extract(content)
+      location = content["style"] + "/" + content["s3_key"]
+      unless File.exist?(location)
+        gateway.download_content(content, folder: content["style"])
+        extract_content(content) if content["s3_key"].end_with?(".tar.gz")
+      end
+    end
+
     private
 
-    def finished_workshop
-      RPW::CLI.new.print_banner
-      puts "Congratulations!"
-      puts "You have completed the Rails Performance Workshop."
+    def mark_current_lesson_as_completed
+      reset_progress unless client_data["current_lesson"] && client_data["completed"]
+      client_data["completed"] ||= []
+      client_data["completed"] += [client_data["current_lesson"] || 0]
     end
 
     def chart_section_progress(contents, completed)
@@ -182,13 +174,6 @@ module RPW
         end
     end
 
-    def next_content
-      contents = gateway.list_content
-      return contents.first unless client_data["completed"]
-      contents.delete_if { |c| client_data["completed"].include? c["position"] }
-      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
-    end
-
     def client_data
       @client_data ||= ClientData.new
     end
@@ -196,48 +181,6 @@ module RPW
     def extract_content(content)
       folder = content["style"]
       `tar -C #{folder} -xvzf #{folder}/#{content["s3_key"]}`
-    end
-
-    def display_content(content, open_after)
-      puts "\nCurrent Lesson: #{content["title"]}"
-      openable = false
-      case content["style"]
-      when "video"
-        location = "video/#{content["s3_key"]}"
-        openable = true
-      when "quiz"
-        Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
-      when "lab"
-        location = "lab/#{content["s3_key"][0..-8]}"
-      when "text"
-        location = "lab/#{content["s3_key"]}"
-        openable = true
-      when "cgrp"
-        puts "The Complete Guide to Rails Performance has been downloaded and extracted to the ./cgrp directory."
-        puts "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
-      end
-      if location
-        if openable && !open_after
-          puts "This file can be opened automatically if you use the --open flag next time."
-          puts "e.g. $ rpw lesson next --open"
-          puts "Download complete. Open with: $ #{open_command} #{location}"
-        elsif open_after && openable
-          exec "#{open_command} #{location}"
-        end
-      end
-    end
-
-    require "rbconfig"
-    def open_command
-      host_os = RbConfig::CONFIG["host_os"]
-      case host_os
-      when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
-        "start"
-      when /darwin|mac os/
-        "open"
-      else
-        "xdg-open"
-      end
     end
   end
 end

@@ -1,6 +1,6 @@
 require_relative "helper"
 
-class TestRPW < Minitest::Test
+class TestRPW < RPWTest
   LICENSE_KEY = "this-is-a-key"
   ADMIN_KEY = "this-is-a-admin-key"
 
@@ -36,15 +36,5 @@ class TestRPW < Minitest::Test
     File.stub :open, proc { raise } do
       assert_raises(RPW::Error) { @client.setup(LICENSE_KEY) }
     end
-  end
-
-  private
-
-  def delete_dotfile
-    RPW::ClientData.delete_filestore
-  end
-
-  def create_dotfile
-    RPW::ClientData.create_in_pwd!
   end
 end

@@ -1,8 +1,17 @@
 require "open3"
 
 unless Gem.win_platform?
-  class TestRPWIntegration < Minitest::Test
+  class TestRPWIntegration < RPWTest
     COMMAND = "exe/rpw start"
+
+    def setup
+      delete_dotfile
+      create_dotfile
+    end
+
+    def teardown
+      delete_dotfile
+    end
 
     def test_setup
       matcher = nil
