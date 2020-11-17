@@ -46,15 +46,22 @@ jobs:
       - name: nuke server ruby requirement 
         run: grep -v "^ruby" Gemfile > temp && mv temp Gemfile
         working-directory: ./server
-        
+
       - name: bundle install the server
-        run:   |
+        run: |
           bundle install --jobs 4 --retry 3
         working-directory: ./server
 
       - name: start the server 
         run: rails server &
         working-directory: ./server
+
+      - name: wait for server 
+        run: |
+          until $(curl --output /dev/null --silent --head --fail http://localhost:3000); do
+            printf '.'
+            sleep 1
+          done
 
       - name: test
         run: bundle exec rake test
