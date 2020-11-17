@@ -24,7 +24,6 @@ module RPW
       return contents.first unless client_data["completed"]
       contents.delete_if { |c| client_data["completed"].include? c["position"] }
       contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
-      nil
     end
 
     def list
