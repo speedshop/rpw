@@ -1,3 +1,7 @@
+## Installation Requirements
+
+This client assumes you have `tar` installed.
+
 ## Important Commands
 
 Here are some important commands for you to know:

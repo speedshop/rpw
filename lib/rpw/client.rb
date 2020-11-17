@@ -47,10 +47,9 @@ module RPW
         ClientData.create_in_pwd!
       end
 
-      unless File.exist?(".gitignore") && File.read(".gitignore").match(/rpw_key/)
+      unless File.exist?(".gitignore") && File.read(".gitignore").match(/rpw_info/)
         File.open(".gitignore", "a") do |f|
           f.puts "\n"
-          f.puts ".rpw_key\n"
           f.puts ".rpw_info\n"
           f.puts "video\n"
           f.puts "quiz\n"
