@@ -4,6 +4,16 @@ on: [push, pull_request]
 
 jobs:
   build:
+    services:
+      postgres:
+        image: postgres:11.6-alpine
+        env:
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     name: >-
       ${{ matrix.os }} ${{ matrix.ruby }}
     env:
@@ -44,12 +54,13 @@ jobs:
           path: server 
 
       - name: nuke server ruby requirement 
-        run: grep -v "^ruby" Gemfile > temp && mv temp Gemfile
+        run: grep -v "^ruby" Gemfile > temp && mv -f temp Gemfile
         working-directory: ./server
 
       - name: bundle install the server
         run: |
           bundle install --jobs 4 --retry 3
+          bundle exec rails db:setup
         working-directory: ./server
 
       - name: start the server 
