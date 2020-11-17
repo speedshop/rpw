@@ -76,14 +76,16 @@ module RPW
 
     def check_version
       unless client.latest_version?
-        say "#{r}WARNING: You are running an old version of rpw."
-        say "WARNING: Please run `$ gem install rpw`#{reset}"
+        say "WARNING: You are running an old version of rpw."
+        say "WARNING: Please run `$ gem install rpw`"
+        exit(0)
       end
     end
 
     def check_setup
       unless client.setup? || current_command_chain == [:start]
         say "WARNING: You do not have a purchase key set. Run `$ rpw start`"
+        exit(0)
       end
     end
   end
