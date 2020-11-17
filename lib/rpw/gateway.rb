@@ -46,6 +46,7 @@ module RPW
       end
       Excon.get(content["url"], response_block: streamer)
       downloaded_file.close
+      print "\n"
       File.rename(downloaded_file, "#{folder}/#{content["s3_key"]}")
     end
 

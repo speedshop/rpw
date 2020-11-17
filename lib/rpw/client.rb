@@ -19,6 +19,22 @@ module RPW
       gateway.register_email(email)
     end
 
+    def next
+      contents = gateway.list_content
+      return contents.first unless client_data["completed"]
+      contents.delete_if { |c| client_data["completed"].include? c["position"] }
+      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
+    end
+
+    def list
+      gateway.list_content
+    end
+
+    def show(content_pos)
+      content_pos = client_data["current_lesson"] if content_pos == :current
+      gateway.get_content_by_position(content_pos)
+    end
+
     def directory_setup(home_dir_ok = true)
       ["video", "quiz", "lab", "text", "cgrp"].each do |path|
         FileUtils.mkdir_p(path) unless File.directory?(path)
@@ -48,43 +64,9 @@ module RPW
       end
     end
 
-    def next
-      contents = gateway.list_content
-      return contents.first unless client_data["completed"]
-      contents.delete_if { |c| client_data["completed"].include? c["position"] }
-      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
-    end
-
     def increment_current_lesson!(position)
       mark_current_lesson_as_completed
       client_data["current_lesson"] = position
-    end
-
-    def list
-      gateway.list_content
-    end
-
-    def show(content_pos)
-      content_pos = client_data["current_lesson"] if content_pos == :current
-      gateway.get_content_by_position(content_pos)
-    end
-
-    def download(content_pos)
-      if content_pos.downcase == "all"
-        to_download = gateway.list_content
-        to_download.each do |content|
-          unless File.exist?(content["style"] + "/" + content["s3_key"])
-            gateway.download_content(content, folder: content["style"])
-          end
-        end
-        to_download.each { |content| extract_content(content) if content["s3_key"].end_with?(".tar.gz") }
-      else
-        content = gateway.get_content_by_position(content_pos)
-        unless File.exist?(content["style"] + "/" + content["s3_key"])
-          gateway.download_content(content, folder: content["style"])
-          extract_content(content) if content["s3_key"].end_with?(".tar.gz")
-        end
-      end
     end
 
     def progress

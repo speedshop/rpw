@@ -34,8 +34,13 @@ module RPW
     end
 
     desc "download [CONTENT | all]", "Download one or all workshop contents"
-    def download(content)
-      client.download(content)
+    def download(content_pos)
+      to_download = if content_pos.downcase == "all"
+        client.list
+      else 
+        [client.show(content_pos)]
+      end
+      to_download.each { |content| client.download_and_extract(content) }
     end
 
     desc "show [CONTENT]", "Show any workshop lesson, shows current lesson w/no arguments"
@@ -49,7 +54,6 @@ module RPW
     private
 
     def display_content(content, open_after)
-      say ""
       say "Current Lesson: #{content["title"]}"
       openable = false
       case content["style"]
