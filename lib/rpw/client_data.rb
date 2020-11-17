@@ -16,7 +16,7 @@ module RPW
     def []=(key, value)
       data
       data[key] = value
-
+      
       begin
         File.open(filestore_location, "w") { |f| f.write(YAML.dump(data)) }
       rescue
@@ -62,8 +62,11 @@ module RPW
 
     def data
       @data ||= begin
-        yaml = YAML.safe_load(File.read(filestore_location), permitted_classes: [Time])
-        yaml || {}
+        begin
+          YAML.safe_load(File.read(filestore_location), permitted_classes: [Time]) || {}
+        rescue Errno::ENOENT
+          {}
+        end
       end
     end
   end

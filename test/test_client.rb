@@ -5,16 +5,13 @@ class TestRPW < Minitest::Test
   ADMIN_KEY = "this-is-a-admin-key"
 
   def setup
-    @client = RPW::Client.new
-    if ENV["LIVE_SERVER"]
-      def @client.gateway
-        @gateway ||= RPW::Gateway.new("localhost:3000")
-      end
+    gateway = if ENV["LIVE_SERVER"]
+      RPW::Gateway.new("localhost:3000")
     else
-      def @client.gateway
-        @gateway ||= TestGateway.new
-      end
+      TestGateway.new
     end
+    @client = RPW::Client.new(gateway)
+
     delete_dotfile
     create_dotfile
   end

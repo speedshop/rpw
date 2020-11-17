@@ -4,6 +4,11 @@ require "rpw/cli/quiz"
 module RPW
   class Client
     RPW_SERVER_DOMAIN = ENV["RPW_SERVER_DOMAIN"] || "https://rpw-licensor.speedshop.co"
+    attr_reader :gateway
+
+    def initialize(gateway = nil)
+      @gateway = gateway || Gateway.new(RPW_SERVER_DOMAIN, client_data["key"])
+    end
 
     def setup(key)
       gateway.authenticate_key(key)
@@ -186,10 +191,6 @@ module RPW
 
     def client_data
       @client_data ||= ClientData.new
-    end
-
-    def gateway
-      @gateway ||= Gateway.new(RPW_SERVER_DOMAIN, client_data["key"])
     end
 
     def extract_content(content)
