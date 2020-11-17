@@ -1,6 +1,7 @@
 ## 0.0.6
 
 * more bugfixes from beta testers
+* CI
 
 ## 0.0.5
 
