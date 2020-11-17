@@ -66,6 +66,8 @@ jobs:
 
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1
+        with:
+          ruby-version: 2.7.2
 
       - name: bundle install
         run:   |
