@@ -12,6 +12,7 @@ module RPW
         RPW::CLI.new.print_banner
         say "Congratulations!"
         say "You have completed the Rails Performance Workshop."
+        exit(0)
       end
 
       client.download_and_extract(content)
@@ -37,7 +38,7 @@ module RPW
     def download(content_pos)
       to_download = if content_pos.downcase == "all"
         client.list
-      else 
+      else
         [client.show(content_pos)]
       end
       to_download.each { |content| client.download_and_extract(content) }
