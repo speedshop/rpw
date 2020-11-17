@@ -7,7 +7,7 @@ class TestRPW < Minitest::Test
   def setup
     gateway = if ENV["LIVE_SERVER"]
       puts "Running against localhost server"
-      RPW::Gateway.new("localhost:3000", LICENSE_KEY)
+      RPW::Gateway.new("http://localhost:3000", LICENSE_KEY)
     else
       TestGateway.new
     end
