@@ -44,9 +44,7 @@ jobs:
   build-live:
     services:
       postgres:
-        image: postgres:11.6-alpine
-        env:
-          POSTGRES_PASSWORD: password
+        image: postgres:alpine
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
