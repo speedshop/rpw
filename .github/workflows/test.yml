@@ -17,7 +17,7 @@ jobs:
         || contains(github.event.head_commit.message, '[ci skip]')
         || contains(github.event.head_commit.message, '[skip ci]'))
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ ubuntu-20.04, macos-10.15, windows-2019 ]
         ruby: [ 2.6, 2.7, head ]
@@ -44,8 +44,9 @@ jobs:
           path: server 
 
       - name: nuke server ruby requirement 
-        run: sed -i '/ruby/d' ./server/Gemfile
-
+        run: grep -v "^ruby" Gemfile > temp && mv temp Gemfile
+        working-directory: ./server
+        
       - name: bundle install the server
         run:   |
           bundle install --jobs 4 --retry 3
