@@ -4,16 +4,6 @@ on: [push, pull_request]
 
 jobs:
   build:
-    services:
-      postgres:
-        image: postgres:11.6-alpine
-        env:
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     name: >-
       ${{ matrix.os }} ${{ matrix.ruby }}
     env:
@@ -48,6 +38,39 @@ jobs:
       - name: standardrb 
         run: bundle exec standardrb 
 
+      - name: test
+        run: bundle exec rake test
+
+  build-live:
+    services:
+      postgres:
+        image: postgres:11.6-alpine
+        env:
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    name: Test against a live server
+    env:
+      CI: true
+      TESTOPTS: -v 
+      LIVE_SERVER: true
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: load ruby
+        uses: MSP-Greg/setup-ruby-pkgs@v1
+
+      - name: bundle install
+        run:   |
+          bundle install --jobs 4 --retry 3
+
       - uses: actions/checkout@master
         with:
           repository: speedshop/licensor
@@ -77,4 +100,4 @@ jobs:
       - name: test
         run: bundle exec rake test
         env:
-          LIVE_SERVER: true
+          LIVE_SERVER: true 
