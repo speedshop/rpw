@@ -28,7 +28,8 @@ jobs:
       
       - uses: actions/checkout@master
         with:
-          name: speedshop/licensor
+          repository: speedshop/licensor
+          path: server 
 
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1
