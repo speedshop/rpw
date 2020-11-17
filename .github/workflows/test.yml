@@ -57,6 +57,7 @@ jobs:
       CI: true
       TESTOPTS: -v 
       LIVE_SERVER: true
+      POSTGRES_PASSWORD: password
 
     runs-on: ubuntu-latest
 
