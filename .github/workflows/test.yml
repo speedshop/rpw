@@ -88,14 +88,16 @@ jobs:
           bundle exec rails db:setup
         working-directory: ./server
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
 
       - name: start the server 
         run: rails server &
         working-directory: ./server
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          
+
       - name: wait for server 
         run: |
           until $(curl --output /dev/null --silent --head --fail http://localhost:3000); do
