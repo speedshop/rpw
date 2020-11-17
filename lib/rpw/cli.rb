@@ -45,7 +45,11 @@ module RPW
 
       key = ask("Your Purchase Key: ")
 
-      client.setup(key)
+      unless client.setup(key)
+        say "That is not a valid key. Please try again."
+        exit(0)
+      end
+
       puts ""
       say "Successfully authenticated with the RPW server and saved your key."
       puts ""
@@ -70,7 +74,7 @@ module RPW
 
     def warn_if_already_started
       return unless client.setup?
-      exit(0) unless yes? "You have already started the workshop. Continuing"\
+      exit(0) unless yes? "You have already started the workshop. Continuing "\
         "this command will wipe all of your current progress. Continue? (y/N)"
     end
 

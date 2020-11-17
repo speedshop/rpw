@@ -11,8 +11,9 @@ module RPW
     end
 
     def setup(key)
-      gateway.authenticate_key(key)
-      client_data["key"] = key
+      success = gateway.authenticate_key(key)
+      client_data["key"] = key if success
+      success
     end
 
     def register_email(email)

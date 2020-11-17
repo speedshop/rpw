@@ -21,8 +21,8 @@ class TestRPW < RPWTest
     delete_dotfile
   end
 
-  def test_setup_returns_provided_key
-    assert_equal LICENSE_KEY, @client.setup(LICENSE_KEY)
+  def test_setup_returns_true
+    assert @client.setup(LICENSE_KEY)
   end
 
   def test_setup_creates_dotfile_with_key_idempotently
