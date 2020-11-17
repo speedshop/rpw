@@ -107,5 +107,3 @@ jobs:
 
       - name: test
         run: bundle exec rake test
-        env:
-          LIVE_SERVER: true 
