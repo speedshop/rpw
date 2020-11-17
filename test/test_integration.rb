@@ -1,15 +1,16 @@
 require "open3"
 
-class TestRPWIntegration < Minitest::Test
-  LICENSE_KEY = "this-is-a-key"
-  ADMIN_KEY = "this-is-a-admin-key"
+unless Gem.win_platform?
+  class TestRPWIntegration < Minitest::Test
+    COMMAND = "exe/rpw start"
 
-  def test_setup
-    matcher = nil
-    Open3.popen3("exe/rpw start") do |stdin, stdout, stderr|
-      stdin.close
-      matcher = stdout.read
+    def test_setup
+      matcher = nil
+      Open3.popen3(COMMAND) do |stdin, stdout, stderr|
+        stdin.close
+        matcher = stdout.read
+      end
+      assert_match "Welcome to the Rails Performance Workshop", matcher
     end
-    assert_match "Welcome to the Rails Performance Workshop", matcher
   end
 end
