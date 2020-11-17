@@ -16,7 +16,7 @@ module RPW
     def []=(key, value)
       data
       data[key] = value
-      
+
       begin
         File.open(filestore_location, "w") { |f| f.write(YAML.dump(data)) }
       rescue
