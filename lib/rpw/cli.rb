@@ -56,8 +56,7 @@ module RPW
       say "Setup complete!"
       puts ""
       say "To learn how to use this command-line client, consult README.md."
-      say "Remember to ask on Slack for help if you get stuck or encounter bugs."
-      say "Once you're ready to get going: $ rpw lesson next"
+      say "Once you've read that and you're ready to get going: $ rpw lesson next"
     end
 
     no_commands do
