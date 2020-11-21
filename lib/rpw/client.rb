@@ -21,14 +21,27 @@ module RPW
     end
 
     def next
-      contents = gateway.list_content
-      return contents.first unless client_data["completed"]
-      contents.delete_if { |c| client_data["completed"].include? c["position"] }
-      contents.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
+      return list.first unless client_data["completed"]
+      list.delete_if { |c| client_data["completed"].include? c["position"] }
+      list.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
     end
 
     def list
-      gateway.list_content
+      @list ||= begin
+        if client_data["content_cache_generated"] &&
+            client_data["content_cache_generated"] >= Time.now - 60 * 60
+
+          client_data["content_cache"]
+        else
+          begin
+            client_data["content_cache"] = gateway.list_content
+            client_data["content_cache_generated"] = Time.now
+            client_data["content_cache"]
+          rescue
+            client_data["content_cache"] || (raise Error.new("No internet connection"))
+          end
+        end
+      end
     end
 
     def show(content_pos)
@@ -70,13 +83,12 @@ module RPW
     end
 
     def progress
-      contents = gateway.list_content
       completed_lessons = client_data["completed"] || []
       {
         completed: completed_lessons.size,
-        total: contents.size,
-        current_lesson: contents.find { |c| c["position"] == client_data["current_lesson"] },
-        sections: chart_section_progress(contents, completed_lessons)
+        total: list.size,
+        current_lesson: list.find { |c| c["position"] == client_data["current_lesson"] },
+        sections: chart_section_progress(list, completed_lessons)
       }
     end
 
