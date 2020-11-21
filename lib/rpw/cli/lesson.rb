@@ -3,7 +3,7 @@ module RPW
     class_before :exit_with_no_key
 
     desc "next", "Proceed to the next lesson of the workshop"
-    option :open
+    option :"no-open"
     def next
       say "Proceeding to next lesson..."
       content = client.next
@@ -17,7 +17,7 @@ module RPW
 
       client.download_and_extract(content)
       client.increment_current_lesson!(content["position"])
-      display_content(content, options[:open])
+      display_content(content, !options[:"no-open"])
     end
 
     desc "complete", "Mark the current lesson as complete"
@@ -45,11 +45,11 @@ module RPW
     end
 
     desc "show [CONTENT]", "Show any workshop lesson, shows current lesson w/no arguments"
-    option :open
+    option :"no-open"
     def show(content_order = :current)
       content = client.show(content_order)
       client.download_and_extract(content)
-      display_content(content, options[:open])
+      display_content(content, !options[:"no-open"])
     end
 
     private
