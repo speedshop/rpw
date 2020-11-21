@@ -103,11 +103,8 @@ module RPW
 
     def latest_version?
       return true unless ClientData.exists?
-
-      if client_data["last_version_check"]
-        return true if client_data["last_version_check"] >= Time.now - (60 * 60 * 24)
-        return false if client_data["last_version_check"] == false
-      end
+      return true if client_data["last_version_check"] &&
+        client_data["last_version_check"] >= Time.now - (60 * 60)
 
       begin
         latest = gateway.latest_version?
