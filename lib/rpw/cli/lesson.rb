@@ -16,14 +16,14 @@ module RPW
       end
 
       client.download_and_extract(content)
-      client.increment_current_lesson!(content["position"])
+      client.complete(content["position"])
       display_content(content, !options[:"no-open"])
     end
 
     desc "complete", "Mark the current lesson as complete"
     def complete
       say "Marked current lesson as complete"
-      client.complete
+      client.complete(nil)
     end
 
     desc "list", "Show all available workshop lessons"
@@ -65,17 +65,17 @@ module RPW
         Quiz.start(["give_quiz", "quiz/" + content["s3_key"]])
       when "lab"
         location = "lab/#{content["s3_key"][0..-8]}"
+        openable = true
       when "text"
-        location = "lab/#{content["s3_key"]}"
+        location = "text/#{content["s3_key"]}"
         openable = true
       when "cgrp"
         say "The Complete Guide to Rails Performance has been downloaded and extracted to the ./cgrp directory."
         say "All source code for the CGRP is in the src directory, PDF and other compiled formats are in the release directory."
+        say "You can check it out now, or to continue: $ rpw lesson next "
       end
       if location
         if openable && !open_after
-          say "This file can be opened automatically if you use the --open flag next time."
-          say "e.g. $ rpw lesson next --open"
           say "Download complete. Open with: $ #{open_command} #{location}"
         elsif open_after && openable
           exec "#{open_command} #{location}"

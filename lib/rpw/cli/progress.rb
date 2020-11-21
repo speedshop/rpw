@@ -3,8 +3,9 @@ module RPW
     class_before :exit_with_no_key
 
     desc "set [LESSON]", "Set current lesson to a particular lesson"
-    def set(lesson)
-      client.set_progress(lesson)
+    def set(pos)
+      lesson = client.set_progress(pos.to_i)
+      say "Set current progress to #{lesson["title"]}"
     end
 
     desc "reset", "Erase all progress and start over"

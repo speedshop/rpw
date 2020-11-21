@@ -22,8 +22,7 @@ module RPW
 
     def next
       return list.first unless client_data["completed"]
-      list.delete_if { |c| client_data["completed"].include? c["position"] }
-      list.sort_by { |c| c["position"] }[1] # 0 would be the current lesson
+      list.sort_by { |c| c["position"] }.find { |c| c["position"] > current_position }
     end
 
     def list
@@ -45,7 +44,7 @@ module RPW
     end
 
     def show(content_pos)
-      content_pos = client_data["current_lesson"] if content_pos == :current
+      content_pos = current_position if content_pos == :current
       gateway.get_content_by_position(content_pos)
     end
 
@@ -77,27 +76,24 @@ module RPW
       end
     end
 
-    def increment_current_lesson!(position)
-      mark_current_lesson_as_completed
-      client_data["current_lesson"] = position
-    end
-
     def progress
       completed_lessons = client_data["completed"] || []
       {
         completed: completed_lessons.size,
         total: list.size,
-        current_lesson: list.find { |c| c["position"] == client_data["current_lesson"] },
+        current_lesson: list.find { |c| c["position"] == current_position },
         sections: chart_section_progress(list, completed_lessons)
       }
     end
 
-    def set_progress(lesson)
-      client_data["current_lesson"] = lesson.to_i
+    def set_progress(pos)
+      lesson = list.find { |l| l["position"] == pos }
+      raise Error.new("No such lesson - use the IDs in $ rpw lesson list") unless lesson
+      client_data["completed"] += [pos]
+      lesson
     end
 
     def reset_progress
-      client_data["current_lesson"] = 0
       client_data["completed"] = []
     end
 
@@ -138,19 +134,23 @@ module RPW
       end
     end
 
+    def complete(position)
+      reset_progress unless client_data["completed"]
+      # we actually have to put the _next_ lesson on the completed stack
+      set_progress(self.next["position"])
+    end
+
     private
 
-    def mark_current_lesson_as_completed
-      reset_progress unless client_data["current_lesson"] && client_data["completed"]
-      client_data["completed"] ||= []
-      client_data["completed"] += [client_data["current_lesson"] || 0]
+    def current_position
+      @current_position ||= client_data["completed"]&.last || 0
     end
 
     def chart_section_progress(contents, completed)
       contents.group_by { |c| c["position"] / 100 }
         .each_with_object([]) do |(_, c), memo|
           completed_str = c.map { |l|
-            if l["position"] == client_data["current_lesson"]
+            if l["position"] == current_position
               "O"
             elsif completed.include?(l["position"])
               "X"

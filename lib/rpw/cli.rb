@@ -55,7 +55,7 @@ module RPW
       puts ""
       say "Setup complete!"
       puts ""
-      say "To learn how to use this command-line client, consult README.md."
+      say "To learn how to use this command-line client, consult ./README.md, which we just created."
       say "Once you've read that and you're ready to get going: $ rpw lesson next"
     end
 

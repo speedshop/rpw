@@ -1,6 +1,13 @@
 ## Installation Requirements
 
+This client assumes you're using Ruby 2.3 or later.
+
 This client assumes you have `tar` installed and available on your PATH.
+
+The way that the client opens files (using `open` or `xdg-open` depending on platform) assumes you have your default program for the following filetypes set correctly:
+
+* .md for Markdown (XCode by default on Mac: you probably want to change that!)
+* .mp4 for videos
 
 ## Slack Invite 
 
