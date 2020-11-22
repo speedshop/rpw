@@ -1,3 +1,7 @@
+## 1.0.0
+
+* First release!
+
 ## 0.0.6
 
 * more bugfixes from beta testers
