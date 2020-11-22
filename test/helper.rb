@@ -12,6 +12,8 @@ class TestGateway
   end
 end
 
+# class TestClientData
+
 class RPWTest < Minitest::Test
   def delete_dotfile
     RPW::ClientData.delete_filestore

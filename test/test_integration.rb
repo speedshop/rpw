@@ -21,5 +21,18 @@ unless Gem.win_platform?
       end
       assert_match "Welcome to the Rails Performance Workshop", matcher
     end
+
+    # with no rpw_info
+    # setup creates rpw_info and directories, gitignore and README
+    # all other commands rejected
+    # setup creates info in home or PWD
+    # with rpw_info
+    # progress, lesson list show good output
+    # key registration works/rejects bad input
+    # download, show
+    # download all
+    # complete -> show -> complete -> show
+    # next
+    # progress setting
   end
 end

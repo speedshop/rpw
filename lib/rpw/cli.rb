@@ -81,7 +81,6 @@ module RPW
       unless client.latest_version?
         say "WARNING: You are running an old version of rpw."
         say "WARNING: Please run `$ gem install rpw`"
-        exit(0)
       end
     end
 

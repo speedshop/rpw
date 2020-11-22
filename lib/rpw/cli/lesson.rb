@@ -29,8 +29,10 @@ module RPW
     desc "list", "Show all available workshop lessons"
     def list
       say "All available workshop lessons:"
+      say "Use [ID] for the show/download command"
+      say "[ID]: Lesson Name"
       client.list.each do |lesson|
-        puts "#{"  " * lesson["indent"]}[#{lesson["position"]}]: #{lesson["title"]}"
+        puts "[#{lesson["position"]}]:#{"  " * lesson["indent"]} #{lesson["title"]}"
       end
     end
 

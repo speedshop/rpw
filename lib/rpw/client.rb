@@ -87,14 +87,11 @@ module RPW
     end
 
     def set_progress(pos)
+      client_data["completed"] = [] && return if pos.nil?
       lesson = list.find { |l| l["position"] == pos }
       raise Error.new("No such lesson - use the IDs in $ rpw lesson list") unless lesson
       client_data["completed"] += [pos]
       lesson
-    end
-
-    def reset_progress
-      client_data["completed"] = []
     end
 
     def latest_version?

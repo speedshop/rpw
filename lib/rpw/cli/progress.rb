@@ -10,8 +10,9 @@ module RPW
 
     desc "reset", "Erase all progress and start over"
     def reset
-      yes? "Are you sure you want to reset your progress? (Y/N)"
-      client.reset_progress
+      return unless yes? "Are you sure you want to reset your progress? (Y/N)"
+      say "Resetting progress."
+      client.set_progress(nil)
     end
 
     desc "show", "Show current workshop progress"

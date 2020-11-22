@@ -45,7 +45,10 @@ module RPW
         print "Remaining: #{(remaining_bytes.to_f / total_bytes * 100).round(2).to_s.rjust(8)}%" if remaining_bytes
       end
       response = Excon.get(content["url"], response_block: streamer)
-      raise Error.new("Server problem: #{response.status}") unless response.status == 200
+      unless response.status == 200
+        puts response.inspect
+        raise Error.new("Server problem: #{response.status}")
+      end
       downloaded_file.close
       print "\n"
       File.rename(downloaded_file, "#{folder}/#{content["s3_key"]}")
