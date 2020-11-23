@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rpw (1.1.0)
+    rpw (1.2.0)
       cli-ui
       excon
       thor
