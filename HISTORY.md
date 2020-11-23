@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Added suggested schedules to README
+
 ## 1.2.0
 
 * Actual release version!
