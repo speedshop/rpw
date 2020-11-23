@@ -1,6 +1,6 @@
 ## Installation Requirements
 
-This client assumes you're using Ruby 2.3 or later.
+This client assumes you're using Ruby 2.6 or later.
 
 This client assumes you have `tar` installed and available on your PATH.
 
