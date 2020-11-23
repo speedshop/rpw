@@ -25,6 +25,11 @@ module RPW
       list.sort_by { |c| c["position"] }.find { |c| c["position"] > current_position }
     end
 
+    def current
+      return list.first unless client_data["completed"]
+      list.sort_by { |c| c["position"] }.find { |c| c["position"] == current_position }
+    end
+
     def list
       @list ||= begin
         if client_data["content_cache_generated"] &&
@@ -75,22 +80,17 @@ module RPW
       end
     end
 
-    def progress
-      completed_lessons = client_data["completed"] || []
-      {
-        completed: completed_lessons.size,
-        total: list.size,
-        current_lesson: list.find { |c| c["position"] == current_position },
-        sections: chart_section_progress(list, completed_lessons)
-      }
-    end
-
-    def set_progress(pos)
+    def set_progress(pos, all_prior: false)
       client_data["completed"] = [] && return if pos.nil?
-      lesson = list.find { |l| l["position"] == pos }
-      raise Error.new("No such lesson - use the IDs in $ rpw lesson list") unless lesson
-      client_data["completed"] += [pos]
-      lesson
+      if all_prior
+        lessons = list.select { |l| l["position"] <= pos }
+        client_data["completed"] = lessons.map { |l| l["position"] }
+        lessons
+      else
+        lesson = list.find { |l| l["position"] == pos }
+        client_data["completed"] += [pos]
+        lesson
+      end
     end
 
     def latest_version?
@@ -144,25 +144,6 @@ module RPW
 
     def current_position
       @current_position ||= client_data["completed"]&.last || 0
-    end
-
-    def chart_section_progress(contents, completed)
-      contents.group_by { |c| c["position"] / 100 }
-        .each_with_object([]) do |(_, c), memo|
-          completed_str = c.map { |l|
-            if l["position"] == current_position
-              "O"
-            elsif completed.include?(l["position"])
-              "X"
-            else
-              "."
-            end
-          }.join
-          memo << {
-            title: c[0]["title"],
-            progress: completed_str
-          }
-        end
     end
 
     def client_data

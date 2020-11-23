@@ -11,6 +11,11 @@ The way that the client opens files (using `open` or `xdg-open` depending on pla
 
 ## Slack Invite 
 
+The Slack channel is your best resource for questions about Rails Performance
+or other material in the workshop. Nate is almost always monitoring that channel.
+
+If you encounter a **bug or other software problem**, please email support@speedshop.co.
+
 If you purchased the Workshop yourself, you will receive a Slack channel invitation
 shortly. If you are attending the Workshop as part of a group and your license key
 was provided to you, you need to register your key to get an invite:
@@ -21,33 +26,28 @@ $ rpw key register [YOUR_EMAIL_ADDRESS]
 
 Please note you can only register your key once.
 
-The Slack channel is your best resource for questions about Rails Performance
-or other material in the workshop. Nate is almost always monitoring that channel.
-
-If you encounter a **bug or other software problem**, please email support@speedshop.co.
-
 ## Important Commands
 
 Here are some important commands for you to know:
 
 ```
-$ rpw lesson next     | Proceed to the next part of the workshop.
-$ rpw lesson complete | Mark current lesson as complete.
-$ rpw lesson list     | List all workshop lessons. Note each lesson is preceded with an ID.
-$ rpw lesson download | Download all lessons. Useful for offline access.
-$ rpw lesson show     | Show any particular workshop lesson.
-$ rpw progress        | Show where you're currently at in the workshop.
+$ rpw next     | Proceed to the next part of the workshop.
+$ rpw complete | Mark current lesson as complete.
+$ rpw list     | List all workshop lessons. Shows progress.
+$ rpw download | Download all lessons. Useful for offline access.
+$ rpw show     | Show any particular workshop lesson.
+$ rpw progress | Show where you're currently at in the workshop.
 ```
 
-Generally, you'll just be doing a lot of `$ rpw lesson next`!
+Generally, you'll just be doing a lot of `$ rpw next`!
 
-By default, `$ rpw lesson next` will try to open the content it downloads. If you 
-either don't like this, or for some reason it doesn't work, use `$ rpw lesson next --no-open`.
+By default, `$ rpw next` will try to open the content it downloads. If you 
+either don't like this, or for some reason it doesn't work, use `$ rpw next --no-open`.
 
 ## Working Offline 
 
 By default, the course will download each piece of content as you progress through 
-the course. However, you can use `rpw lesson download all` to download all content
+the course. However, you can use `rpw download` to download all content
 at once, and complete the workshop entirely offline.
 
 Videos in this workshop are generally about 100MB each, which means the entire
