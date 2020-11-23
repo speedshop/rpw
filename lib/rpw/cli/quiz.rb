@@ -14,8 +14,8 @@ module RPW
     def question(data)
       puts data["prompt"]
       data["answer_choices"].each { |ac| puts ac }
-      provided_answer = ask("Your answer?")
-      answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer.upcase)
+      provided_answer = ::CLI::UI::Prompt.ask("Your answer?", options: %w[A B C D])
+      answer_digest = Digest::MD5.hexdigest(data["prompt"] + provided_answer)
       if answer_digest == data["answer_digest"]
         say "Correct!"
       else

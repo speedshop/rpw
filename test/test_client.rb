@@ -31,10 +31,4 @@ class TestRPW < RPWTest
 
     assert_equal LICENSE_KEY, YAML.safe_load(File.read(RPW::ClientData.filestore_location))["key"]
   end
-
-  def test_setup_dotfile_write_can_fail_and_raise
-    File.stub :open, proc { raise } do
-      assert_raises(RPW::Error) { @client.setup(LICENSE_KEY) }
-    end
-  end
 end

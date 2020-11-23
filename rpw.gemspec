@@ -27,4 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "thor"
   spec.add_dependency "thor-hollaback"
   spec.add_dependency "excon"
+  spec.add_dependency "cli-ui"
 end

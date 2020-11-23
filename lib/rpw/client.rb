@@ -44,8 +44,7 @@ module RPW
     end
 
     def show(content_pos)
-      content_pos = current_position if content_pos == :current
-      gateway.get_content_by_position(content_pos)
+      list.find { |l| l["position"] == content_pos }
     end
 
     def directory_setup(home_dir_ok = true)

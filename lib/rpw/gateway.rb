@@ -16,16 +16,6 @@ module RPW
       Excon.get(domain + "/license", user: key).status == 200
     end
 
-    def get_content_by_position(position)
-      response = Excon.get(domain + "/contents/positional?position=#{position}", user: @key)
-      if response.status == 200
-        JSON.parse(response.body)
-      else
-        puts response.inspect
-        raise Error, "There was a problem fetching this content."
-      end
-    end
-
     def list_content
       response = Excon.get(domain + "/contents", user: @key)
       if response.status == 200
@@ -37,21 +27,21 @@ module RPW
     end
 
     def download_content(content, folder:)
-      puts "Downloading #{content["title"]}..."
-      downloaded_file = File.open("#{folder}/#{content["s3_key"]}.partial", "w")
-      streamer = lambda do |chunk, remaining_bytes, total_bytes|
-        downloaded_file.write(chunk)
-        print 13.chr
-        print "Remaining: #{(remaining_bytes.to_f / total_bytes * 100).round(2).to_s.rjust(8)}%" if remaining_bytes
+      ::CLI::UI::Progress.progress do |bar|
+        downloaded_file = File.open("#{folder}/#{content["s3_key"]}.partial", "w")
+        streamer = lambda do |chunk, remaining_bytes, total_bytes|
+          downloaded_file.write(chunk)
+          bar.tick(set_percent: 1 - (remaining_bytes.to_f / total_bytes).round(2))
+        end
+        response = Excon.get(content["url"], response_block: streamer)
+        unless response.status == 200
+          puts response.inspect
+          raise Error.new("Server problem: #{response.status}")
+        end
+        downloaded_file.close
+        File.rename(downloaded_file, "#{folder}/#{content["s3_key"]}")
+        bar.tick(set_percent: 1)
       end
-      response = Excon.get(content["url"], response_block: streamer)
-      unless response.status == 200
-        puts response.inspect
-        raise Error.new("Server problem: #{response.status}")
-      end
-      downloaded_file.close
-      print "\n"
-      File.rename(downloaded_file, "#{folder}/#{content["s3_key"]}")
     end
 
     def latest_version?

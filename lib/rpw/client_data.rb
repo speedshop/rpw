@@ -20,8 +20,8 @@ module RPW
       begin
         File.open(filestore_location, "w") { |f| f.write(YAML.dump(data)) }
       rescue
-        raise Error, "The RPW data at #{filestore_location} is not writable. \
-                      Check your file permissions."
+        # raise Error, "The RPW data at #{filestore_location} is not writable. \
+        # Check your file permissions."
       end
     end
 

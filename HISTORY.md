@@ -1,3 +1,7 @@
+## 1.1.0 
+
+* sick colors
+
 ## 1.0.1 
 
 * Pre-launch bugfix

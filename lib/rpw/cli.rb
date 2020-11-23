@@ -6,11 +6,13 @@ require "rpw/cli/sub_command_base"
 require "rpw/cli/key"
 require "rpw/cli/lesson"
 require "rpw/cli/progress"
+require "cli/ui"
+
+CLI::UI::StdoutRouter.enable
 
 module RPW
   class CLI < Thor
     class_before :check_version
-    class_before :check_setup
 
     desc "key register [EMAIL_ADDRESS]", "Change email registered w/Speedshop"
     subcommand "key", Key
@@ -28,7 +30,7 @@ module RPW
       warn_if_already_started
 
       print_banner
-      say "Welcome to the Rails Performance Workshop."
+      say "\u{1F48E} Welcome to the Rails Performance Workshop. \u{1F48E}"
       say ""
       say "This is rpw, the command line client for this workshop."
       say ""
@@ -36,14 +38,22 @@ module RPW
       say "working directory, so it's best to run this client from a new directory"
       say "that you'll use as your 'scratch space' for working on the Workshop."
       say ""
-      say "We will create a handful of new files and folders in the current directory."
-      return unless yes? "Is this OK? (y/N) (N will quit)"
-      puts ""
-      say "We'll also create a .rpw_info file at #{File.expand_path("~/.rpw")} to save your purchase key."
-      home_dir_ok = yes?("Is this OK? (y/N) (N will create it in the current directory)")
-      client.directory_setup(home_dir_ok)
 
-      key = ask("Your Purchase Key: ")
+      ans = ::CLI::UI.confirm "Create files and folders in this directory? (no will quit)"
+
+      exit(1) unless ans
+
+      say ""
+
+      ans = ::CLI::UI::Prompt.ask("Where should we save your course progress?",
+        options: [
+          "here",
+          "my home directory (~/.rpw)"
+        ])
+
+      client.directory_setup((ans == "my home directory (~/.rpw)"))
+
+      key = ::CLI::UI::Prompt.ask("Your Purchase Key: ")
 
       unless client.setup(key)
         say "That is not a valid key. Please try again."
@@ -73,21 +83,14 @@ module RPW
 
     def warn_if_already_started
       return unless client.setup?
-      exit(0) unless yes? "You have already started the workshop. Continuing "\
-        "this command will wipe all of your current progress. Continue? (y/N)"
+      exit(0) unless ::CLI::UI.confirm "You have already started the workshop. Continuing "\
+        "this command will wipe all of your current progress. Continue?", default: false
     end
 
     def check_version
       unless client.latest_version?
         say "WARNING: You are running an old version of rpw."
         say "WARNING: Please run `$ gem install rpw`"
-      end
-    end
-
-    def check_setup
-      unless client.setup? || current_command_chain == [:start]
-        say "WARNING: You do not have a purchase key set. Run `$ rpw start`"
-        exit(0)
       end
     end
   end

@@ -1,10 +1,9 @@
 module RPW
   class Lesson < SubCommandBase
-    class_before :exit_with_no_key
-
     desc "next", "Proceed to the next lesson of the workshop"
     option :"no-open"
     def next
+      exit_with_no_key
       say "Proceeding to next lesson..."
       content = client.next
 
@@ -28,27 +27,56 @@ module RPW
 
     desc "list", "Show all available workshop lessons"
     def list
-      say "All available workshop lessons:"
-      say "Use [ID] for the show/download command"
-      say "[ID]: Lesson Name"
+      ::CLI::UI::Frame.open("{{*}} {{bold:All Lessons}}", color: :green)
+
+      frame_open = false
       client.list.each do |lesson|
-        puts "[#{lesson["position"]}]:#{"  " * lesson["indent"]} #{lesson["title"]}"
+        if lesson["title"].start_with?("Section")
+          ::CLI::UI::Frame.close(nil) if frame_open
+          ::CLI::UI::Frame.open(lesson["title"])
+          frame_open = true
+          next
+        end
+
+        case lesson["style"]
+        when "video"
+          puts ::CLI::UI.fmt "{{red:#{lesson["title"]}}}"
+        when "quiz"
+          # puts ::CLI::UI.fmt "{{green:#{"  " + lesson["title"]}}}"
+        when "lab"
+          puts ::CLI::UI.fmt "{{yellow:#{"  " + lesson["title"]}}}"
+        when "text"
+          puts ::CLI::UI.fmt "{{magenta:#{"  " + lesson["title"]}}}"
+        else
+          puts ::CLI::UI.fmt "{{magenta:#{"  " + lesson["title"]}}}"
+        end
+      end
+
+      ::CLI::UI::Frame.close(nil)
+      ::CLI::UI::Frame.close(nil, color: :green)
+    end
+
+    desc "download", "Download all workshop contents"
+    def download
+      exit_with_no_key
+      total = client.list.size
+      client.list.each do |content|
+        current = client.list.index(content)
+        puts "Downloading #{content["title"]} (#{current}/#{total})"
+        client.download_and_extract(content)
       end
     end
 
-    desc "download [CONTENT | all]", "Download one or all workshop contents"
-    def download(content_pos)
-      to_download = if content_pos.downcase == "all"
-        client.list
-      else
-        [client.show(content_pos)]
-      end
-      to_download.each { |content| client.download_and_extract(content) }
-    end
-
-    desc "show [CONTENT]", "Show any workshop lesson, shows current lesson w/no arguments"
+    desc "show", "Show any individal workshop lesson"
     option :"no-open"
-    def show(content_order = :current)
+    def show
+      exit_with_no_key
+      title = ::CLI::UI::Prompt.ask(
+        "Which lesson would you like to view?",
+        options: client.list.reject { |l| l["title"] == "Quiz" }.map { |l| "  " * l["indent"] + l["title"] }
+      )
+      title.strip!
+      content_order = client.list.find { |l| l["title"] == title }["position"]
       content = client.show(content_order)
       client.download_and_extract(content)
       display_content(content, !options[:"no-open"])
