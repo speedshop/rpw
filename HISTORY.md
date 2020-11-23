@@ -1,3 +1,8 @@
+## 1.2.0
+
+* Actual release version!
+* Greatly streamlined commands
+
 ## 1.1.0 
 
 * sick colors
