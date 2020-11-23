@@ -58,3 +58,37 @@ course is about a 3 to 4GB download.
 ## Bugs and Support
 
 If you encounter any problems, please email support@speedshop.co for the fastest possible response.
+
+## Suggested Schedules
+
+I've found that self-directed learners are most effective when they set a schedule for themselves. These schedules will work if you are learning alone or in a group. 
+
+### 4-Week Schedule 
+
+This is my recommended schedule. It is designed so that you can do the workshop as "20% time", or as part of a larger performance "sprint".
+
+If you follow this schedule, you should be able to complete the workshop in about 4 weeks. I suggest leaving an entire day aside to complete your material for the week, e.g. Mondays. Tuesday through Friday should be used to complete exercises and PR Safaris.
+
+* **Week 1**: Modules 1 and 2
+* **Week 2**: Module 3 and 4
+* **Week 3**: Module 5
+* **Week 4**: Module 6 
+
+### 1-Week Intensive Schedule
+
+For those of you looking to immerse yourselves and only work on this workshop for 8 hours a day for 5 days, this schedule is suggested:
+
+* **Day 1**: Modules 1 and 2
+* **Day 2**: Module 3
+* **Day 3**: Module 4
+* **Day 4**: Module 5 
+* **Day 5**: Module 6
+
+### 80/20 Schedule
+
+Short on time? Here's the 20% of the course content that's the most important:
+
+* Module 1
+* Module 5
+
+If I had the time to go through a limited amount of the workshop content, I would concentrate exclusively on these two modules.
