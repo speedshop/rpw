@@ -54,17 +54,19 @@ module RPW
         exit(0)
       end
 
-      puts ""
+      say ""
       say "Successfully authenticated with the RPW server and saved your key."
-      puts ""
+      say ""
       say "Setup complete!"
-      puts ""
-      say "To learn how to use this command-line client, consult ./README.md, which we just created."
+      say ""
+      say "To learn how to use this command-line client, consult ./README.md,"
+      say "which we just created."
+      say ""
       say "Once you've read that and you're ready to get going: $ rpw next"
     end
 
     desc "next", "Proceed to the next lesson of the workshop"
-    option :"no-open"
+    option :"no-open", type: :boolean
     def next
       exit_with_no_key
       content = client.next
@@ -83,10 +85,11 @@ module RPW
     end
 
     desc "current", "Open the current lesson"
+    option :"no-open", type: :boolean
     def current
       exit_with_no_key
       content = client.current
-      say "Opening #{content["title"]}"
+      say "Opening: #{content["title"]}"
       client.download_and_extract(content)
       display_content(content, !options[:"no-open"])
     end
@@ -144,14 +147,14 @@ module RPW
       exit_with_no_key
       total = client.list.size
       client.list.each do |content|
-        current = client.list.index(content)
+        current = client.list.index(content) + 1
         puts "Downloading #{content["title"]} (#{current}/#{total})"
         client.download_and_extract(content)
       end
     end
 
     desc "show", "Show any individal workshop lesson"
-    option :"no-open"
+    option :"no-open", type: :boolean
     def show
       exit_with_no_key
       title = ::CLI::UI::Prompt.ask(

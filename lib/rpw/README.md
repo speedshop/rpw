@@ -36,12 +36,14 @@ $ rpw complete | Mark current lesson as complete.
 $ rpw list     | List all workshop lessons. Shows progress.
 $ rpw download | Download all lessons. Useful for offline access.
 $ rpw show     | Show any particular workshop lesson.
-$ rpw progress | Show where you're currently at in the workshop.
+$ rpw current  | Opens the current lesson.
 ```
 
-Generally, you'll just be doing a lot of `$ rpw next`!
+Generally, you'll just be doing a lot of `$ rpw next`! It's basically the same thing as `$ rpw complete && rpw show`.
 
-By default, `$ rpw next` will try to open the content it downloads. If you 
+#### --no-open
+
+By default, `$ rpw next` (and `$ rpw show` and `$ rpw current`) will try to open the content it downloads. If you 
 either don't like this, or for some reason it doesn't work, use `$ rpw next --no-open`.
 
 ## Working Offline 
