@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rpw (1.0.0)
+    rpw (1.0.1)
       excon
       thor
       thor-hollaback

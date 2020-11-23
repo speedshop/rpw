@@ -132,9 +132,13 @@ module RPW
     end
 
     def complete(position)
-      reset_progress unless client_data["completed"]
-      # we actually have to put the _next_ lesson on the completed stack
-      set_progress(self.next["position"])
+      if client_data["completed"]
+        # we actually have to put the _next_ lesson on the completed stack
+        set_progress(self.next["position"])
+      else
+        client_data["completed"] = []
+        set_progress(position)
+      end
     end
 
     private

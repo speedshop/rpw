@@ -1,3 +1,7 @@
+## 1.0.1 
+
+* Pre-launch bugfix
+
 ## 1.0.0
 
 * First release!
