@@ -1,3 +1,7 @@
+## 1.3.1
+
+* Removed tar verbose mode
+
 ## 1.3.0
 
 * Added suggested schedules to README

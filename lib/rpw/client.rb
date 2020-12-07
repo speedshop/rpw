@@ -152,7 +152,7 @@ module RPW
 
     def extract_content(content)
       folder = content["style"]
-      `tar -C #{folder} -xvzf #{folder}/#{content["s3_key"]}`
+      `tar -C #{folder} -xzf #{folder}/#{content["s3_key"]}`
     end
   end
 end
