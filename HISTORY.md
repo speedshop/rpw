@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Add `--quizzes` option to `rpw show`, to see quizzes
+
 ## 1.3.1
 
 * Removed tar verbose mode
@@ -11,11 +15,11 @@
 * Actual release version!
 * Greatly streamlined commands
 
-## 1.1.0 
+## 1.1.0
 
 * sick colors
 
-## 1.0.1 
+## 1.0.1
 
 * Pre-launch bugfix
 
