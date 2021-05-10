@@ -155,11 +155,12 @@ module RPW
 
     desc "show", "Show any individal workshop lesson"
     option :"no-open", type: :boolean
+    option :quizzes, type: :boolean
     def show
       exit_with_no_key
       title = ::CLI::UI::Prompt.ask(
         "Which lesson would you like to view?",
-        options: client.list.reject { |l| l["title"] == "Quiz" }.map { |l| "  " * l["indent"] + l["title"] }
+        options: client.list.reject { |l| !options[:quizzes] && l["title"] == "Quiz" }.map { |l| "  " * l["indent"] + l["title"] }
       )
       title.strip!
       content_order = client.list.find { |l| l["title"] == title }["position"]
