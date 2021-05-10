@@ -4,3 +4,4 @@ bundle
 .rpw_info
 smoketest
 scripts
+.DS_Store
