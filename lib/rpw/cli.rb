@@ -255,7 +255,7 @@ module RPW
 
     def warn_if_already_started
       return unless client.setup?
-      exit(0) unless ::CLI::UI.confirm "You have already started the workshop. Continuing "\
+      exit(0) unless ::CLI::UI.confirm "You have already started the workshop. Continuing " \
         "this command will wipe all of your current progress. Continue?", default: false
     end
 

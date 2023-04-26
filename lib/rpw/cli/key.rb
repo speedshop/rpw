@@ -9,7 +9,7 @@ module RPW
       if client.register_email(email)
         say "Key registered with #{email}. You should receive a Slack invite soon."
       else
-        say "Key has already been registered. If you believe this is in error,"\
+        say "Key has already been registered. If you believe this is in error," \
           " please email support@speedshop.co"
       end
     end

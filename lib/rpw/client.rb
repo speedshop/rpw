@@ -31,19 +31,17 @@ module RPW
     end
 
     def list
-      @list ||= begin
-        if client_data["content_cache_generated"] &&
-            client_data["content_cache_generated"] >= Time.now - 60 * 60
+      @list ||= if client_data["content_cache_generated"] &&
+          client_data["content_cache_generated"] >= Time.now - 60 * 60
 
+        client_data["content_cache"]
+      else
+        begin
+          client_data["content_cache"] = gateway.list_content
+          client_data["content_cache_generated"] = Time.now
           client_data["content_cache"]
-        else
-          begin
-            client_data["content_cache"] = gateway.list_content
-            client_data["content_cache_generated"] = Time.now
-            client_data["content_cache"]
-          rescue
-            client_data["content_cache"] || (raise Error.new("No internet connection"))
-          end
+        rescue
+          client_data["content_cache"] || (raise Error.new("No internet connection"))
         end
       end
     end
